@@ -11,7 +11,7 @@ jobs:
     name: Lint
     strategy:
       matrix:
-        go: ['1.12.x', '1.13.x', '1.14.x']
+        go: ['1.13.x', '1.14.x']
     runs-on: ubuntu-latest
     steps:
     - name: Set up Go 1.x
@@ -30,7 +30,7 @@ jobs:
     name: Test
     strategy:
       matrix:
-        go: ['1.12.x', '1.13.x', '1.14.x']
+        go: ['1.13.x', '1.14.x']
     runs-on: ubuntu-latest
     steps:
     - name: Set up Go 1.x
@@ -54,7 +54,7 @@ jobs:
     name: Build
     strategy:
       matrix:
-        go: ['1.12.x', '1.13.x', '1.14.x']
+        go: ['1.13.x', '1.14.x']
     runs-on: ubuntu-latest
     steps:
     - name: Set up Go 1.x
