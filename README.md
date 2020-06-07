@@ -1,6 +1,8 @@
 # Go DB Credential Refresh
 
-[![Godoc Reference](https://godoc.org/github.com/davepgreene/go-db-credential-refresh?status.svg)](https://pkg.go.dev/github.com/davepgreene/go-db-credential-refresh) ![Go](https://github.com/davepgreene/go-db-credential-refresh/workflows/Go/badge.svg)
+[![Godoc Reference](https://godoc.org/github.com/davepgreene/go-db-credential-refresh?status.svg)](https://pkg.go.dev/github.com/davepgreene/go-db-credential-refresh) ![Go](https://github.com/davepgreene/go-db-credential-refresh/workflows/Go/badge.svg) [![codecov](https://codecov.io/gh/davepgreene/go-db-credential-refresh/branch/master/graph/badge.svg)](https://codecov.io/gh/davepgreene/go-db-credential-refresh)
+
+
 
 Go DB Credential Refresh is a driver to handle seamlessly reconnecting `database/sql` connections on credential rotation. This driver will work fine with static credentials but is designed for systems like [Hashicorp Vault](https://www.vaultproject.io/)'s [Database Secrets Engines](https://www.vaultproject.io/docs/secrets/databases) or [AWS RDS IAM Authentication](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html) where the credentials are retrieved from the identity manager before connecting.
 
