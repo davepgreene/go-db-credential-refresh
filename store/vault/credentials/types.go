@@ -1,8 +1,9 @@
 package vaultcredentials
 
 import (
-	"github.com/davepgreene/go-db-credential-refresh/store"
 	"github.com/hashicorp/vault/api"
+
+	"github.com/davepgreene/go-db-credential-refresh/store"
 )
 
 // CredentialLocation represents a location where credentials can be retrieved from

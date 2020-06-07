@@ -1,8 +1,9 @@
 package vaultcredentials
 
 import (
-	"github.com/davepgreene/go-db-credential-refresh/store"
 	"github.com/hashicorp/vault/api"
+
+	"github.com/davepgreene/go-db-credential-refresh/store"
 )
 
 // KvCredentials implements the CredentialLocation interface

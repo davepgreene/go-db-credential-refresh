@@ -6,9 +6,10 @@ import (
 	"net"
 	"testing"
 
-	"github.com/davepgreene/go-db-credential-refresh/store/vault/vaulttest"
 	log "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/vault/api"
+
+	"github.com/davepgreene/go-db-credential-refresh/store/vault/vaulttest"
 )
 
 // SetupVault sets up an in-memory Vault core and webserver then enables the plugins/configs we need for

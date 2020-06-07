@@ -3,8 +3,9 @@ package vaultcredentials
 import (
 	"fmt"
 
-	"github.com/davepgreene/go-db-credential-refresh/store"
 	"github.com/hashicorp/vault/api"
+
+	"github.com/davepgreene/go-db-credential-refresh/store"
 )
 
 // APIDatabaseCredentials gets DB credentials from the Vault Database Secrets engine
