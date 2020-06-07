@@ -30,13 +30,13 @@ func (e errMissingConfigItem) Error() string {
 }
 
 // https://aws.amazon.com/premiumsupport/knowledge-center/users-connect-rds-iam/
-// Store is a Store implementation for AWS RDS
+// Store is a Store implementation for AWS RDS.
 type Store struct {
 	*Config
 	creds driver.Credentials
 }
 
-// Config contains configuration information
+// Config contains configuration information.
 type Config struct {
 	Endpoint    string // Endpoint takes the form of host:port
 	Region      string
@@ -44,7 +44,7 @@ type Config struct {
 	Credentials aws.CredentialsProvider
 }
 
-// NewStore creates a new RDS-backed store
+// NewStore creates a new RDS-backed store.
 func NewStore(c *Config) (*Store, error) {
 	if c == nil {
 		return nil, errMissingConfig
@@ -53,9 +53,11 @@ func NewStore(c *Config) (*Store, error) {
 	if c.Endpoint == "" {
 		return nil, &errMissingConfigItem{item: "endpoint"}
 	}
+
 	if c.Region == "" {
 		return nil, &errMissingConfigItem{item: "region"}
 	}
+
 	if c.User == "" {
 		return nil, &errMissingConfigItem{item: "user"}
 	}
@@ -86,7 +88,7 @@ func NewStore(c *Config) (*Store, error) {
 	}, nil
 }
 
-// Get implements the Store interface
+// Get implements the Store interface.
 func (v *Store) Get() (driver.Credentials, error) {
 	if v.creds != nil {
 		return v.creds, nil
@@ -95,9 +97,10 @@ func (v *Store) Get() (driver.Credentials, error) {
 	return v.Refresh()
 }
 
-// Refresh implements the store interface
+// Refresh implements the store interface.
 func (v *Store) Refresh() (driver.Credentials, error) {
 	signer := v4.NewSigner(v.Credentials)
+
 	token, err := rdsutils.BuildAuthToken(context.Background(), v.Endpoint, v.Region, v.User, signer)
 	if err != nil {
 		return nil, err

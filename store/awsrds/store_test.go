@@ -99,19 +99,20 @@ func TestStoreValidation(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if _, err := NewStore(&conf); err == nil {
+			_, err = NewStore(&conf)
+			if err == nil {
 				t.Error("expected an error but didn't get one")
-			} else {
-				// If we have a pointer to an error we need to compare error strings
-				if reflect.ValueOf(testCase.expectedErr).Kind() == reflect.Ptr {
-					if err.Error() != testCase.expectedErr.Error() {
-						t.Errorf("expected '%v' but got '%v' instead", testCase.expectedErr, err)
-					}
-				} else {
-					if err != testCase.expectedErr {
-						t.Errorf("expected '%T' but got '%T' instead", testCase.expectedErr, err)
-					}
-				}
+				return
+			}
+
+			// If we have a pointer to an error we need to compare error strings
+			if reflect.ValueOf(testCase.expectedErr).Kind() == reflect.Ptr && err.Error() != testCase.expectedErr.Error() {
+				t.Errorf("expected '%v' but got '%v' instead", testCase.expectedErr, err)
+				return
+			}
+
+			if reflect.ValueOf(testCase.expectedErr).Kind() != reflect.Ptr && err != testCase.expectedErr {
+				t.Errorf("expected '%T' but got '%T' instead", testCase.expectedErr, err)
 			}
 		})
 	}
@@ -195,6 +196,7 @@ func TestStoreCachesCredentials(t *testing.T) {
 	// 15 minute expiration for each signed token. To ensure we don't repeatedly generate the same signing
 	// token we need to wind the clock forward past the 15 minute window.
 	var patch *monkey.PatchGuard
+
 	patch = monkey.Patch(time.Now, func() time.Time {
 		patch.Unpatch()
 		defer patch.Restore()

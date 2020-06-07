@@ -22,7 +22,7 @@ type AgentDatabaseCredentials struct {
 	path   string
 }
 
-// NewAgentDatabaseCredentials creates a new AgentDatabaseCredentials instance
+// NewAgentDatabaseCredentials creates a new AgentDatabaseCredentials instance.
 func NewAgentDatabaseCredentials(mapper Mapper, path string) CredentialLocation {
 	return &AgentDatabaseCredentials{
 		mapper: mapper,
@@ -30,20 +30,22 @@ func NewAgentDatabaseCredentials(mapper Mapper, path string) CredentialLocation 
 	}
 }
 
-// GetCredentials implements the CredentialLocation interface
+// GetCredentials implements the CredentialLocation interface.
 func (adb *AgentDatabaseCredentials) GetCredentials(_ *api.Client) (string, error) {
 	creds, err := ioutil.ReadFile(adb.path)
 	if err != nil {
 		return "", err
 	}
+
 	return string(creds), nil
 }
 
-// Map implements the CredentialLocation interface
+// Map implements the CredentialLocation interface.
 func (adb *AgentDatabaseCredentials) Map(s string) (*store.Credential, error) {
 	m, err := adb.mapper(s)
 	if err != nil {
 		return nil, err
 	}
+
 	return m, nil
 }

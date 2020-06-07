@@ -2,6 +2,7 @@ package vaultcredentials
 
 import (
 	"encoding/json"
+	"errors"
 	"testing"
 
 	"github.com/davepgreene/go-db-credential-refresh/store/vault/vaulttest"
@@ -42,7 +43,7 @@ func TestGetFromVaultSecretsAPI(t *testing.T) {
 		t.Error("expected an error but didn't get one")
 	}
 
-	if err != errInvalidPath {
+	if !errors.Is(err, errInvalidPath) {
 		t.Errorf("expected a '%T' but got '%T' instead", errInvalidPath, err)
 	}
 }

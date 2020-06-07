@@ -23,18 +23,19 @@ func NewAPIDatabaseCredentials(role, path string) CredentialLocation {
 	if path == "" {
 		path = "database"
 	}
+
 	return &APIDatabaseCredentials{
 		role: role,
 		path: path,
 	}
 }
 
-// GetCredentials implements the CredentialLocation interface
+// GetCredentials implements the CredentialLocation interface.
 func (db *APIDatabaseCredentials) GetCredentials(client *api.Client) (string, error) {
 	return GetFromVaultSecretsAPI(client, fmt.Sprintf("%s/creds/%s", db.path, db.role))
 }
 
-// Map implements the CredentialLocation interface
+// Map implements the CredentialLocation interface.
 func (db *APIDatabaseCredentials) Map(s string) (*store.Credential, error) {
 	return DefaultMapper(s)
 }

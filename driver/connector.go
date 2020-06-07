@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-// Config is a struct that holds non-credential database configuration
+// Config is a struct that holds non-credential database configuration.
 type Config struct {
 	Host      string
 	Port      int
@@ -17,10 +17,17 @@ type Config struct {
 	Formatter Formatter
 }
 
-// NewConnector creates a new connector from a store
+var (
+	ErrConfigRequired   = errors.New("config is required")
+	ErrNoNilCredentials = errors.New("store cannot return nil credentials")
+	ErrMissingUsername  = errors.New("missing username")
+	ErrMissingPassword  = errors.New("missing password")
+)
+
+// NewConnector creates a new connector from a store.
 func NewConnector(s Store, driverName string, cfg *Config) (*Connector, error) {
 	if cfg == nil {
-		return nil, errors.New("config is required")
+		return nil, ErrConfigRequired
 	}
 
 	d, fmt, authErr, err := CreateDriver(driverName)
@@ -49,7 +56,7 @@ func NewConnector(s Store, driverName string, cfg *Config) (*Connector, error) {
 	}, nil
 }
 
-// Connector represents a driver in a fixed configuration
+// Connector represents a driver in a fixed configuration.
 type Connector struct {
 	store      Store
 	cfg        *Config
@@ -59,7 +66,7 @@ type Connector struct {
 	mu         sync.Mutex
 }
 
-// Connect implements driver.Connector interface
+// Connect implements driver.Connector interface.
 func (c *Connector) Connect(ctx context.Context) (driver.Conn, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -68,55 +75,58 @@ func (c *Connector) Connect(ctx context.Context) (driver.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if creds == nil {
-		return nil, errors.New("store cannot return nil credentials")
+		return nil, ErrNoNilCredentials
 	}
 
 	username := creds.GetUsername()
 	password := creds.GetPassword()
 
 	if username == "" {
-		return nil, errors.New("missing username")
+		return nil, ErrMissingUsername
 	}
 
 	if password == "" {
-		return nil, errors.New("missing password")
+		return nil, ErrMissingPassword
 	}
 
 	connStr := c.formatter(username, password, c.cfg.Host, c.cfg.Port, c.cfg.DB, c.cfg.Opts)
+
 	conn, err := c.driver.Open(connStr)
-	if err != nil {
-		if c.errHandler(err) {
-			var i uint = 0
-			for ; i < c.cfg.Retries; i++ {
-				creds, err = c.store.Refresh()
-				if err != nil {
-					return nil, err
-				}
+	if err == nil {
+		return conn, nil
+	}
 
-				connStr = c.formatter(creds.GetUsername(), creds.GetPassword(), c.cfg.Host, c.cfg.Port, c.cfg.DB, c.cfg.Opts)
-				conn, err = c.driver.Open(connStr)
-				if err == nil {
-					return conn, nil
-				}
-
-				// Bail if we get an error that we can't handle with new creds
-				if !c.errHandler(err) {
-					return nil, err
-				}
-			}
-
-			// If we've exhausted our retries we'll just return the last error
-			return nil, err
-		}
-
+	if !c.errHandler(err) {
 		return nil, err
 	}
 
-	return conn, nil
+	var i uint = 0
+	for ; i < c.cfg.Retries; i++ {
+		creds, err = c.store.Refresh()
+		if err != nil {
+			return nil, err
+		}
+
+		connStr = c.formatter(creds.GetUsername(), creds.GetPassword(), c.cfg.Host, c.cfg.Port, c.cfg.DB, c.cfg.Opts)
+
+		conn, err = c.driver.Open(connStr)
+		if err == nil {
+			return conn, nil
+		}
+
+		// Bail if we get an error that we can't handle with new creds
+		if !c.errHandler(err) {
+			return nil, err
+		}
+	}
+
+	// If we've exhausted our retries we'll just return the last error
+	return nil, err
 }
 
-// Driver implements driver.Connector interface
+// Driver implements driver.Connector interface.
 func (c *Connector) Driver() driver.Driver {
 	return c.driver
 }

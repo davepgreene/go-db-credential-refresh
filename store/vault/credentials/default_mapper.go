@@ -12,7 +12,7 @@ var (
 	errMissingPassword = errors.New("password not set in credential string")
 )
 
-// DefaultMapper maps the default username/password structure returned from the Vault API
+// DefaultMapper maps the default username/password structure returned from the Vault API.
 func DefaultMapper(s string) (*store.Credential, error) {
 	var v map[string]interface{}
 	if err := json.Unmarshal([]byte(s), &v); err != nil {

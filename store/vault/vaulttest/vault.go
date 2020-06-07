@@ -45,6 +45,7 @@ func CreateTestVault(t *testing.T, l log.Logger) (net.Listener, *api.Client) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	client.SetToken(rootToken)
 
 	return ln, client

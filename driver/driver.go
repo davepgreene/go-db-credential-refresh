@@ -14,6 +14,15 @@ import (
 
 type factory func() (driver.Driver, Formatter, AuthError)
 
+type errFactoryAlreadyRegistered struct {
+	name string
+}
+
+func (e errFactoryAlreadyRegistered) Error() string {
+	return fmt.Sprintf("driver factory %s already registered, ignoring", e.name)
+}
+
+//nolint:gochecknoglobals
 var (
 	driverMu         sync.RWMutex
 	driverFactories  = make(map[string]factory)
@@ -22,9 +31,10 @@ var (
 		"mysql": mysqlDriver,
 		"pq":    pqDriver,
 	}
+	errInvalidDriverName = fmt.Errorf("invalid Driver name. Must be one of: %s", strings.Join(drivers(), ", "))
 )
 
-func init() {
+func init() { //nolint:gochecknoinits
 	registerAllDrivers()
 }
 
@@ -38,14 +48,16 @@ func init() {
 func Register(name string, f factory) error {
 	driverMu.Lock()
 	defer driverMu.Unlock()
+
 	if f == nil {
 		panic(fmt.Sprintf("attempted to register driver %s with a nil factory", name))
 	}
 
 	_, registered := driverFactories[name]
 	if registered {
-		return fmt.Errorf("driver factory %s already registered, ignoring", name)
+		return errFactoryAlreadyRegistered{name}
 	}
+
 	driverFactories[name] = f
 
 	return nil
@@ -71,10 +83,11 @@ func drivers() []string {
 	}
 
 	sort.Strings(drivers)
+
 	return drivers
 }
 
-// CreateDriver creates a Driver
+// CreateDriver creates a Driver.
 func CreateDriver(name string) (driver.Driver, Formatter, AuthError, error) {
 	driverMu.Lock()
 
@@ -82,12 +95,13 @@ func CreateDriver(name string) (driver.Driver, Formatter, AuthError, error) {
 	if !ok {
 		// Factory has not been registered.
 		driverMu.Unlock()
-		return nil, nil, nil, fmt.Errorf("invalid Driver name. Must be one of: %s", strings.Join(drivers(), ", "))
+		return nil, nil, nil, errInvalidDriverName
 	}
 	defer driverMu.Unlock()
 
 	// Run the factory
 	d, f, authError := driverFactory()
+
 	return d, f, authError, nil
 }
 

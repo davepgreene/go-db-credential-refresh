@@ -8,7 +8,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
-// Formatter takes connection string components and assembles them into an implementation-specific conn string/DSN
+// Formatter takes connection string components and assembles them into an implementation-specific conn string/DSN.
 type Formatter func(username string, password string, host string, port int, db string, opts map[string]string) string
 
 // MysqlFormatter formats a connection string for the go-sql-driver/mysql lib
@@ -25,7 +25,7 @@ func MysqlFormatter(username, password, host string, port int, db string, opts m
 	return cfg.FormatDSN()
 }
 
-// PgKVFormatter formats a connection string in the K/V format
+// PgKVFormatter formats a connection string in the K/V format.
 func PgKVFormatter(username, password, host string, port int, db string, opts map[string]string) string {
 	s := fmt.Sprintf("user=%s password=%s host=%s port=%d dbname=%s", username, password, host, port, db)
 
@@ -35,6 +35,7 @@ func PgKVFormatter(username, password, host string, port int, db string, opts ma
 	for k := range opts {
 		keys = append(keys, k)
 	}
+
 	sort.Strings(keys)
 
 	for _, k := range keys {
@@ -44,7 +45,7 @@ func PgKVFormatter(username, password, host string, port int, db string, opts ma
 	return s
 }
 
-// PgFormatter formats a connection URI for the pq and pgx lib
+// PgFormatter formats a connection URI for the pq and pgx lib.
 func PgFormatter(username, password, host string, port int, db string, opts map[string]string) string {
 	u := url.URL{
 		Scheme: "postgres",
@@ -58,10 +59,12 @@ func PgFormatter(username, password, host string, port int, db string, opts map[
 	}
 
 	o := url.Values{}
+
 	for k, v := range opts {
 		o.Set(k, v)
 	}
 
 	u.RawQuery = o.Encode()
+
 	return u.String()
 }

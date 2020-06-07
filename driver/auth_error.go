@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// AuthError is a func to evaluate the DB-specific error string that indicates an authentication error
+// AuthError is a func to evaluate the DB-specific error string that indicates an authentication error.
 type AuthError func(e error) bool
 
 const (
@@ -14,11 +14,11 @@ const (
 	PgErrorText    = "password authentication failed for user"
 )
 
-// MySQLAuthError tests whether an error from MySQL is an authentication failure
-var MySQLAuthError = errorTester(MysqlErrorText)
+// MySQLAuthError tests whether an error from MySQL is an authentication failure.
+var MySQLAuthError = errorTester(MysqlErrorText) //nolint:gochecknoglobals
 
-// PostgreSQLAuthError tests whether an error from PostgreSQL is an authentication failure
-var PostgreSQLAuthError = errorTester(PgErrorText)
+// PostgreSQLAuthError tests whether an error from PostgreSQL is an authentication failure.
+var PostgreSQLAuthError = errorTester(PgErrorText) //nolint:gochecknoglobals
 
 func errorTester(text string) AuthError {
 	return func(e error) bool {

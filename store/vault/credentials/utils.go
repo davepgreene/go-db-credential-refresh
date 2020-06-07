@@ -11,6 +11,7 @@ var (
 	errInvalidPath = errors.New("invalid path")
 )
 
+// GetFromVaultSecretsAPI is a wrapper over logical reads from a Vault path with marshalling and error handling.
 func GetFromVaultSecretsAPI(client *api.Client, path string) (string, error) {
 	resp, err := client.Logical().Read(path)
 	if err != nil {

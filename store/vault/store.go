@@ -14,7 +14,7 @@ type TokenLocation interface {
 	GetToken(client *api.Client) (string, error)
 }
 
-// Store is a Store implementation for HashiCorp Vault
+// Store is a Store implementation for HashiCorp Vault.
 type Store struct {
 	client *api.Client
 	cl     vaultcredentials.CredentialLocation
@@ -22,33 +22,41 @@ type Store struct {
 	creds  driver.Credentials
 }
 
-// Config contains configuration information
+// Config contains configuration information.
 type Config struct {
 	Client             *api.Client
 	TokenLocation      TokenLocation
 	CredentialLocation vaultcredentials.CredentialLocation
 }
 
-// NewStore creates a new Vault-backed store
+var (
+	ErrConfigRequired             = errors.New("config is required")
+	ErrCredentialLocationRequired = errors.New("credential location is required")
+	ErrClientRequired             = errors.New("client is required")
+	ErrTokenLocationRequired      = errors.New("token location is required")
+)
+
+// NewStore creates a new Vault-backed store.
 func NewStore(c *Config) (*Store, error) {
 	if c == nil {
-		return nil, errors.New("config is required")
+		return nil, ErrConfigRequired
 	}
 
 	if c.CredentialLocation == nil {
-		return nil, errors.New("credential location is required")
+		return nil, ErrCredentialLocationRequired
 	}
 
 	client := c.Client
 	if client == nil {
-		return nil, errors.New("client is required")
+		return nil, ErrClientRequired
 	}
 
 	if c.TokenLocation == nil {
 		// If the token location is nil, we should check if the client already has a token
 		if client.Token() == "" {
-			return nil, errors.New("token location is required")
+			return nil, ErrTokenLocationRequired
 		}
+
 		c.TokenLocation = vaultauth.NewTokenAuth(client.Token())
 	}
 
@@ -66,7 +74,7 @@ func NewStore(c *Config) (*Store, error) {
 	}, nil
 }
 
-// Get implements the Store interface
+// Get implements the Store interface.
 func (v *Store) Get() (driver.Credentials, error) {
 	if v.creds != nil {
 		return v.creds, nil
@@ -75,7 +83,7 @@ func (v *Store) Get() (driver.Credentials, error) {
 	return v.Refresh()
 }
 
-// Refresh implements the store interface
+// Refresh implements the store interface.
 func (v *Store) Refresh() (driver.Credentials, error) {
 	credStr, err := v.cl.GetCredentials(v.client)
 	if err != nil {
