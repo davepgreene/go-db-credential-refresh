@@ -15,16 +15,16 @@ const (
 )
 
 type testStore struct {
-	Getter    func() (Credentials, error)
-	Refresher func() (Credentials, error)
+	Getter    func(ctx context.Context) (Credentials, error)
+	Refresher func(ctx context.Context) (Credentials, error)
 }
 
-func (vs *testStore) Get() (Credentials, error) {
-	return vs.Getter()
+func (vs *testStore) Get(ctx context.Context) (Credentials, error) {
+	return vs.Getter(ctx)
 }
 
-func (vs *testStore) Refresh() (Credentials, error) {
-	return vs.Refresher()
+func (vs *testStore) Refresh(ctx context.Context) (Credentials, error) {
+	return vs.Refresher(ctx)
 }
 
 type testDriver struct {
@@ -99,7 +99,7 @@ func TestNewConnectorFailsWithNilConfig(t *testing.T) {
 		t.Error(err)
 	}
 
-	getFn := func() (Credentials, error) {
+	getFn := func(ctx context.Context) (Credentials, error) {
 		return nil, errors.New("error getting creds")
 	}
 
@@ -114,7 +114,7 @@ func TestNewConnectorFailsWithNilConfig(t *testing.T) {
 func TestNewConnectorWithInvalidDriver(t *testing.T) {
 	unregisterAllDrivers()
 
-	getFn := func() (Credentials, error) {
+	getFn := func(ctx context.Context) (Credentials, error) {
 		return nil, nil
 	}
 	if _, err := NewConnector(&testStore{
@@ -144,27 +144,25 @@ func TestConnectorErrorsIfStoreGetFailsReturnsNilOrIsInvalid(t *testing.T) {
 		DB:   "test",
 	}
 
-	ctx := context.Background()
-
 	testCases := []struct {
 		description string
-		getFn       func() (Credentials, error)
+		getFn       func(ctx context.Context) (Credentials, error)
 	}{
 		{
 			description: "error getting creds",
-			getFn: func() (Credentials, error) {
+			getFn: func(ctx context.Context) (Credentials, error) {
 				return nil, errors.New("error getting creds")
 			},
 		},
 		{
 			description: "nil response",
-			getFn: func() (Credentials, error) {
+			getFn: func(ctx context.Context) (Credentials, error) {
 				return nil, nil
 			},
 		},
 		{
 			description: "empty credentials",
-			getFn: func() (Credentials, error) {
+			getFn: func(ctx context.Context) (Credentials, error) {
 				return &testCredential{
 					Username: "",
 					Password: "",
@@ -173,7 +171,7 @@ func TestConnectorErrorsIfStoreGetFailsReturnsNilOrIsInvalid(t *testing.T) {
 		},
 		{
 			description: "username missing",
-			getFn: func() (Credentials, error) {
+			getFn: func(ctx context.Context) (Credentials, error) {
 				return &testCredential{
 					Username: "",
 					Password: password,
@@ -182,7 +180,7 @@ func TestConnectorErrorsIfStoreGetFailsReturnsNilOrIsInvalid(t *testing.T) {
 		},
 		{
 			description: "password missing",
-			getFn: func() (Credentials, error) {
+			getFn: func(ctx context.Context) (Credentials, error) {
 				return &testCredential{
 					Username: username,
 					Password: "",
@@ -200,6 +198,8 @@ func TestConnectorErrorsIfStoreGetFailsReturnsNilOrIsInvalid(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
+
+			ctx := context.Background()
 
 			if _, err = c.Connect(ctx); err == nil {
 				t.Error("expected error but got nil")
@@ -219,7 +219,7 @@ func TestConnectorCanUseAlternateFormatter(t *testing.T) {
 
 	db := "test"
 
-	getFn := func() (Credentials, error) {
+	getFn := func(ctx context.Context) (Credentials, error) {
 		return &testCredential{
 			Username: username,
 			Password: password,
@@ -259,8 +259,7 @@ func TestConnectorRefreshesCredentialsCorrectly(t *testing.T) {
 		t.Error(err)
 	}
 
-	ctx := context.Background()
-	getFn := func() (Credentials, error) {
+	getFn := func(ctx context.Context) (Credentials, error) {
 		return &testCredential{
 			Username: username,
 			Password: password,
@@ -278,6 +277,8 @@ func TestConnectorRefreshesCredentialsCorrectly(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	ctx := context.Background()
 
 	if _, err := c.Connect(ctx); err != nil {
 		t.Error(err)
@@ -299,8 +300,7 @@ func TestConnectorFailsToConnectThenReconnects(t *testing.T) {
 		t.Error(err)
 	}
 
-	ctx := context.Background()
-	getFn := func() (Credentials, error) {
+	getFn := func(ctx context.Context) (Credentials, error) {
 		return &testCredential{
 			Username: username,
 			Password: password,
@@ -319,6 +319,8 @@ func TestConnectorFailsToConnectThenReconnects(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	ctx := context.Background()
 
 	if _, err := c.Connect(ctx); err != nil {
 		t.Error(err)
@@ -347,17 +349,16 @@ func TestConnectorFailsToRefreshOnConnectionFailure(t *testing.T) {
 		Opts: nil,
 	}
 
-	ctx := context.Background()
 	refreshCalled := 0
 
 	c, err := NewConnector(&testStore{
-		Getter: func() (Credentials, error) {
+		Getter: func(ctx context.Context) (Credentials, error) {
 			return &testCredential{
 				Username: username,
 				Password: password,
 			}, nil
 		},
-		Refresher: func() (Credentials, error) {
+		Refresher: func(ctx context.Context) (Credentials, error) {
 			refreshCalled++
 			return nil, errors.New("failed to refresh creds")
 		},
@@ -365,6 +366,8 @@ func TestConnectorFailsToRefreshOnConnectionFailure(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	ctx := context.Background()
 
 	if _, err := c.Connect(ctx); err == nil {
 		t.Error("expected an error but got nil")
@@ -401,17 +404,16 @@ func TestConnectorRetriesUntilSuccess(t *testing.T) {
 		Retries: 3,
 	}
 
-	ctx := context.Background()
 	refreshCalled := 0
 
 	c, err := NewConnector(&testStore{
-		Getter: func() (Credentials, error) {
+		Getter: func(ctx context.Context) (Credentials, error) {
 			return &testCredential{
 				Username: username,
 				Password: password,
 			}, nil
 		},
-		Refresher: func() (Credentials, error) {
+		Refresher: func(ctx context.Context) (Credentials, error) {
 			refreshCalled++
 			if refreshCalled <= 3 {
 				return &testCredential{
@@ -425,6 +427,8 @@ func TestConnectorRetriesUntilSuccess(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	ctx := context.Background()
 
 	if _, err := c.Connect(ctx); err != nil {
 		t.Error("expected an error but got nil")
@@ -467,17 +471,16 @@ func TestConnectorRetriesUntilMax(t *testing.T) {
 		Retries: 2,
 	}
 
-	ctx := context.Background()
 	var refreshCalled uint
 
 	c, err := NewConnector(&testStore{
-		Getter: func() (Credentials, error) {
+		Getter: func(ctx context.Context) (Credentials, error) {
 			return &testCredential{
 				Username: username,
 				Password: password,
 			}, nil
 		},
-		Refresher: func() (Credentials, error) {
+		Refresher: func(ctx context.Context) (Credentials, error) {
 			refreshCalled++
 			return &testCredential{
 				Username: username,
@@ -488,6 +491,8 @@ func TestConnectorRetriesUntilMax(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	ctx := context.Background()
 
 	if _, err := c.Connect(ctx); err == nil {
 		t.Error("expected an error but got nil")
@@ -531,17 +536,16 @@ func TestConnectorRetriesUntilNonAuthError(t *testing.T) {
 		Retries: 5,
 	}
 
-	ctx := context.Background()
 	var refreshCalled uint
 
 	c, err := NewConnector(&testStore{
-		Getter: func() (Credentials, error) {
+		Getter: func(ctx context.Context) (Credentials, error) {
 			return &testCredential{
 				Username: username,
 				Password: password,
 			}, nil
 		},
-		Refresher: func() (Credentials, error) {
+		Refresher: func(ctx context.Context) (Credentials, error) {
 			refreshCalled++
 			return &testCredential{
 				Username: username,
@@ -552,6 +556,8 @@ func TestConnectorRetriesUntilNonAuthError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	ctx := context.Background()
 
 	if _, err := c.Connect(ctx); err == nil {
 		t.Error("expected an error but got nil")
@@ -584,8 +590,7 @@ func TestConnectorErrorsIfUnknownDBErrorMessage(t *testing.T) {
 		Opts: nil,
 	}
 
-	ctx := context.Background()
-	getFn := func() (Credentials, error) {
+	getFn := func(ctx context.Context) (Credentials, error) {
 		return &testCredential{
 			Username: username,
 			Password: password,
@@ -599,6 +604,8 @@ func TestConnectorErrorsIfUnknownDBErrorMessage(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	ctx := context.Background()
 
 	if _, err := c.Connect(ctx); err == nil {
 		t.Error("expected error but got nil")

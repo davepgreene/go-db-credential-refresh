@@ -71,7 +71,7 @@ func (c *Connector) Connect(ctx context.Context) (driver.Conn, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	creds, err := c.store.Get()
+	creds, err := c.store.Get(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func (c *Connector) Connect(ctx context.Context) (driver.Conn, error) {
 
 	var i uint
 	for ; i < c.cfg.Retries; i++ {
-		creds, err = c.store.Refresh()
+		creds, err = c.store.Refresh(ctx)
 		if err != nil {
 			return nil, err
 		}

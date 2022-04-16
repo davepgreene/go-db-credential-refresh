@@ -1,6 +1,7 @@
 package awsrds
 
 import (
+	"context"
 	"errors"
 	"net/url"
 	"reflect"
@@ -137,7 +138,10 @@ func TestValidStoreCanGenerateToken(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	creds, err := s.Get()
+
+	ctx := context.Background()
+
+	creds, err := s.Get(ctx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -161,7 +165,10 @@ func TestStoreErrorsOnUnsignableCredentials(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if _, err := s.Get(); err == nil {
+
+	ctx := context.Background()
+
+	if _, err := s.Get(ctx); err == nil {
 		t.Error("expected an error but didn't get one")
 	}
 }
@@ -177,7 +184,9 @@ func TestStoreCachesCredentials(t *testing.T) {
 		t.Error(err)
 	}
 
-	creds, err := s.Get()
+	ctx := context.Background()
+
+	creds, err := s.Get(ctx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -205,7 +214,7 @@ func TestStoreCachesCredentials(t *testing.T) {
 	defer patch.Unpatch()
 
 	// Second time through we should have everything cached
-	cachedCreds, err := s.Get()
+	cachedCreds, err := s.Get(ctx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -218,7 +227,7 @@ func TestStoreCachesCredentials(t *testing.T) {
 	}
 
 	// On refresh, we should have a new password
-	refreshedCreds, err := s.Refresh()
+	refreshedCreds, err := s.Refresh(ctx)
 	if err != nil {
 		t.Error(err)
 	}

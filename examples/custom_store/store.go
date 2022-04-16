@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
@@ -32,11 +33,11 @@ func NewHTTPTestConnectingStore(url, method string, headers http.Header, handler
 	}, nil
 }
 
-func (h *HTTPTestConnectingStore) Get() (driver.Credentials, error) {
-	return h.Refresh()
+func (h *HTTPTestConnectingStore) Get(ctx context.Context) (driver.Credentials, error) {
+	return h.Refresh(ctx)
 }
 
-func (h *HTTPTestConnectingStore) Refresh() (driver.Credentials, error) {
+func (h *HTTPTestConnectingStore) Refresh(ctx context.Context) (driver.Credentials, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest(h.method, h.url, nil)
 	if err != nil {
@@ -46,6 +47,8 @@ func (h *HTTPTestConnectingStore) Refresh() (driver.Credentials, error) {
 	if h.headers != nil {
 		req.Header = h.headers
 	}
+
+	req = req.WithContext(ctx)
 
 	resp, err := client.Do(req)
 	if err != nil {

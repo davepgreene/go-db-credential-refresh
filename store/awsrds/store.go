@@ -88,17 +88,17 @@ func NewStore(c *Config) (*Store, error) {
 }
 
 // Get implements the Store interface.
-func (v *Store) Get() (driver.Credentials, error) {
+func (v *Store) Get(ctx context.Context) (driver.Credentials, error) {
 	if v.creds != nil {
 		return v.creds, nil
 	}
 
-	return v.Refresh()
+	return v.Refresh(ctx)
 }
 
 // Refresh implements the store interface.
-func (v *Store) Refresh() (driver.Credentials, error) {
-	token, err := auth.BuildAuthToken(context.Background(), v.Endpoint, v.Region, v.User, v.Credentials)
+func (v *Store) Refresh(ctx context.Context) (driver.Credentials, error) {
+	token, err := auth.BuildAuthToken(ctx, v.Endpoint, v.Region, v.User, v.Credentials)
 	if err != nil {
 		return nil, err
 	}

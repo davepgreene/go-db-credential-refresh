@@ -1,6 +1,7 @@
 package vault
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -115,7 +116,9 @@ func TestNewStoreWithValidConfig(t *testing.T) {
 		t.Error(err)
 	}
 
-	creds, err := s.Get()
+	ctx := context.Background()
+
+	creds, err := s.Get(ctx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -157,7 +160,9 @@ func TestNewStoreWithGetCredentialError(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _, err := s.Get(); err == nil {
+	ctx := context.Background()
+
+	if _, err := s.Get(ctx); err == nil {
 		t.Error("expected an error but didn't get one")
 	}
 	if err != nil {
@@ -193,7 +198,9 @@ func TestNewStoreWithCredentialMapperError(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _, err := s.Get(); err == nil {
+	ctx := context.Background()
+
+	if _, err := s.Get(ctx); err == nil {
 		t.Error("expected an error but didn't get one")
 	}
 }
@@ -218,7 +225,9 @@ func TestNewStoreWithClientThatAlreadyHasToken(t *testing.T) {
 		t.Error(err)
 	}
 
-	creds, err := s.Get()
+	ctx := context.Background()
+
+	creds, err := s.Get(ctx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -284,7 +293,9 @@ func TestStoreWithCachedCredentials(t *testing.T) {
 		t.Error(err)
 	}
 
-	creds, err := s.Get()
+	ctx := context.Background()
+
+	creds, err := s.Get(ctx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -297,7 +308,7 @@ func TestStoreWithCachedCredentials(t *testing.T) {
 		t.Errorf("expected password to be '%s' but got '%s' instead", password, creds.GetPassword())
 	}
 
-	if _, err = s.Get(); err != nil {
+	if _, err = s.Get(ctx); err != nil {
 		t.Error(err)
 	}
 

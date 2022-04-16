@@ -1,6 +1,7 @@
 package vault
 
 import (
+	"context"
 	"errors"
 
 	"github.com/hashicorp/vault/api"
@@ -75,16 +76,16 @@ func NewStore(c *Config) (*Store, error) {
 }
 
 // Get implements the Store interface.
-func (v *Store) Get() (driver.Credentials, error) {
+func (v *Store) Get(ctx context.Context) (driver.Credentials, error) {
 	if v.creds != nil {
 		return v.creds, nil
 	}
 
-	return v.Refresh()
+	return v.Refresh(ctx)
 }
 
 // Refresh implements the store interface.
-func (v *Store) Refresh() (driver.Credentials, error) {
+func (v *Store) Refresh(ctx context.Context) (driver.Credentials, error) {
 	credStr, err := v.cl.GetCredentials(v.client)
 	if err != nil {
 		return nil, err
