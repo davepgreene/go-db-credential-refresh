@@ -60,8 +60,8 @@ func (fd *testFailingDriver) Open(dsn string) (driver.Conn, error) {
 }
 
 type testRetryingFailureDriver struct {
-	Called    uint
-	MaxCalled uint
+	Called    int
+	MaxCalled int
 	ConnErr   []error
 }
 
@@ -454,7 +454,7 @@ func TestConnectorRetriesUntilMax(t *testing.T) {
 
 	d := &testRetryingFailureDriver{
 		ConnErr:   connErr,
-		MaxCalled: uint(maxCalled),
+		MaxCalled: maxCalled,
 	}
 
 	if err := Register("driver", func() (driver.Driver, Formatter, AuthError) {
@@ -471,7 +471,7 @@ func TestConnectorRetriesUntilMax(t *testing.T) {
 		Retries: 2,
 	}
 
-	var refreshCalled uint
+	refreshCalled := 0
 
 	c, err := NewConnector(&testStore{
 		Getter: func(ctx context.Context) (Credentials, error) {
@@ -519,7 +519,7 @@ func TestConnectorRetriesUntilNonAuthError(t *testing.T) {
 
 	d := &testRetryingFailureDriver{
 		ConnErr:   connErr,
-		MaxCalled: uint(maxCalled),
+		MaxCalled: maxCalled,
 	}
 
 	if err := Register("driver", func() (driver.Driver, Formatter, AuthError) {
@@ -536,7 +536,7 @@ func TestConnectorRetriesUntilNonAuthError(t *testing.T) {
 		Retries: 5,
 	}
 
-	var refreshCalled uint
+	refreshCalled := 0
 
 	c, err := NewConnector(&testStore{
 		Getter: func(ctx context.Context) (Credentials, error) {

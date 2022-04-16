@@ -13,7 +13,7 @@ type Config struct {
 	Port      int
 	DB        string
 	Opts      map[string]string
-	Retries   uint
+	Retries   int
 	Formatter Formatter
 }
 
@@ -42,7 +42,7 @@ func NewConnector(s Store, driverName string, cfg *Config) (*Connector, error) {
 	}
 
 	// 0 retries means that it should try once, retry, then don't attempt any more retries
-	if cfg.Retries == 0 {
+	if cfg.Retries <= 0 {
 		cfg.Retries = 1
 	}
 
@@ -102,8 +102,7 @@ func (c *Connector) Connect(ctx context.Context) (driver.Conn, error) {
 		return nil, err
 	}
 
-	var i uint
-	for ; i < c.cfg.Retries; i++ {
+	for i := 0; i < c.cfg.Retries; i++ {
 		creds, err = c.store.Refresh(ctx)
 		if err != nil {
 			return nil, err
