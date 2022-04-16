@@ -1,6 +1,9 @@
 # Go DB Credential Refresh
 
-[![Godoc Reference](https://godoc.org/github.com/davepgreene/go-db-credential-refresh?status.svg)](https://pkg.go.dev/github.com/davepgreene/go-db-credential-refresh) ![Go](https://github.com/davepgreene/go-db-credential-refresh/workflows/Go/badge.svg) [![codecov](https://codecov.io/gh/davepgreene/go-db-credential-refresh/branch/master/graph/badge.svg)](https://codecov.io/gh/davepgreene/go-db-credential-refresh)
+[![Godoc Reference](https://godoc.org/github.com/davepgreene/go-db-credential-refresh?status.svg)](https://pkg.go.dev/github.com/davepgreene/go-db-credential-refresh) 
+[![Test](https://github.com/davepgreene/go-db-credential-refresh/actions/workflows/test.yml/badge.svg)](https://github.com/davepgreene/go-db-credential-refresh/actions/workflows/test.yml) 
+[![Lint](https://github.com/davepgreene/go-db-credential-refresh/actions/workflows/lint.yml/badge.svg)](https://github.com/davepgreene/go-db-credential-refresh/actions/workflows/lint.yml) 
+[![codecov](https://codecov.io/gh/davepgreene/go-db-credential-refresh/branch/master/graph/badge.svg)](https://codecov.io/gh/davepgreene/go-db-credential-refresh)
 
 Go DB Credential Refresh is a driver to handle seamlessly reconnecting `database/sql` connections on credential 
 rotation. This driver will work fine with static credentials but is designed for systems like 
@@ -52,8 +55,13 @@ A store is a mechanism to retrieve credentials. When you use the DB driver, you 
 the `Connector`. Every time `Connector.Connect` is called, the store is queried for credentials. Stores must 
 implement the `Store` interface (see [driver/store.go](driver/store.go)).
 
-Go DB Credential Refresh currently ships with store implementations for Vault and RDS IAM Authentication. The Vault store includes both [Token Auth](https://www.vaultproject.io/docs/auth/token) and [Kubernetes Auth](https://www.vaultproject.io/docs/auth/kubernetes) authentication methods. See the `vault` package for more information.
+Go DB Credential Refresh currently ships with store implementations for Vault and RDS IAM Authentication. The 
+Vault store includes both [Token Auth](https://www.vaultproject.io/docs/auth/token) and 
+[Kubernetes Auth](https://www.vaultproject.io/docs/auth/kubernetes) authentication methods. See the 
+[`vault`](./store/vault) package for the Vault implementation and [`awsrds`](./store/awsrds) package for RDS IAM
+Authentication. Both included store implementations are available as independent modules.
 
 ## Examples
 
-See the [examples directory](./examples) for sample usage.
+See the [examples directory](./examples) for sample usage and the Vault [example directory](./store/vault/example)
+for how to use that module.
