@@ -18,5 +18,6 @@ require (
 	github.com/jackc/pgx/v4 v4.15.0
 	github.com/lib/pq v1.10.5
 	github.com/mitchellh/mapstructure v1.4.3
+	github.com/opencontainers/runc v1.0.3 // indirect
 	k8s.io/api v0.23.5
 )
