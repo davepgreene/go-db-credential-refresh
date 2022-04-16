@@ -8,8 +8,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
-	"github.com/aws/aws-sdk-go-v2/service/rds/rdsutils"
+	"github.com/aws/aws-sdk-go-v2/feature/rds/auth"
 
 	"github.com/davepgreene/go-db-credential-refresh/driver"
 	"github.com/davepgreene/go-db-credential-refresh/store"
@@ -29,8 +28,8 @@ func (e errMissingConfigItem) Error() string {
 	return fmt.Sprintf("%s is required", e.item)
 }
 
-// https://aws.amazon.com/premiumsupport/knowledge-center/users-connect-rds-iam/
 // Store is a Store implementation for AWS RDS.
+// https://aws.amazon.com/premiumsupport/knowledge-center/users-connect-rds-iam/
 type Store struct {
 	*Config
 	creds driver.Credentials
@@ -99,9 +98,7 @@ func (v *Store) Get() (driver.Credentials, error) {
 
 // Refresh implements the store interface.
 func (v *Store) Refresh() (driver.Credentials, error) {
-	signer := v4.NewSigner(v.Credentials)
-
-	token, err := rdsutils.BuildAuthToken(context.Background(), v.Endpoint, v.Region, v.User, signer)
+	token, err := auth.BuildAuthToken(context.Background(), v.Endpoint, v.Region, v.User, v.Credentials)
 	if err != nil {
 		return nil, err
 	}

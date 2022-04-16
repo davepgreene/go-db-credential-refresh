@@ -468,7 +468,7 @@ func TestConnectorRetriesUntilMax(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	var refreshCalled uint = 0
+	var refreshCalled uint
 
 	c, err := NewConnector(&testStore{
 		Getter: func() (Credentials, error) {
@@ -532,7 +532,7 @@ func TestConnectorRetriesUntilNonAuthError(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	var refreshCalled uint = 0
+	var refreshCalled uint
 
 	c, err := NewConnector(&testStore{
 		Getter: func() (Credentials, error) {

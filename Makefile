@@ -1,37 +1,30 @@
 PHONY: all
 
-GOCMD=go
-GOTEST=$(GOCMD) test
-GOBUILD=$(GOCMD) build
-GOCOVER=$(GOCMD) tool cover
-
-# Common flags
-GOTEST_NOCACHEFLAG=-count=1
-GOTEST_COVERFILE=cover.out
-GOTEST_COVERFLAG=-coverprofile=$(GOTEST_COVERFILE)
-
-GOLANG_CI_LINT_VERSION=1.27.0
-
+GOLANG_CI_LINT_VERSION=1.45.2
+GO_BIN=$(shell pwd)/.build
 all: test lint
 
 build:
-	$(GOBUILD) ./...
+	go build ./...
 
 test:
-	$(GOTEST) ./... $(GOTEST_NOCACHEFLAG) $(GOTEST_COVERFLAG)
+	go test ./... -count=1 -coverprofile=cover.out
 
 bench:
-	$(GOTEST) ./... -bench $(GOTEST_NOCACHEFLAG) $(GOTEST_COVERFLAG)
+	go test ./... -bench -count=1 -coverprofile=cover.out
 
 cover: test
-	$(GOCOVER) -html=$(GOTEST_COVERFILE)
+	go tool cover -html=cover.out
 
-lint-setup:
+lint-setup: _bin
 	@# Make sure linter is up to date
-	$(eval CURRENT_VERSION := $(strip $(shell ${GOPATH}/bin/golangci-lint version 2>&1 | sed 's/[^0-9.]*\([0-9.]*\).*/\1/')))
+	$(eval CURRENT_VERSION := $(strip $(shell $(GO_BIN)/bin/golangci-lint version 2>&1 | sed 's/[^0-9.]*\([0-9.]*\).*/\1/')))
 	@if [ "$(CURRENT_VERSION)" != "$(GOLANG_CI_LINT_VERSION)" ]; then \
-		curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b ${GOPATH}/bin v$(GOLANG_CI_LINT_VERSION) ; \
+		curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(GO_BIN)" "v$(GOLANG_CI_LINT_VERSION)" ; \
 	fi
 
 lint: lint-setup
-	${GOPATH}/bin/golangci-lint run ./...
+	"$(GO_BIN)/golangci-lint" run ./...
+
+_bin:
+	mkdir -p "$(GO_BIN)"

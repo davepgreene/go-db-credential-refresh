@@ -102,7 +102,7 @@ func (c *Connector) Connect(ctx context.Context) (driver.Conn, error) {
 		return nil, err
 	}
 
-	var i uint = 0
+	var i uint
 	for ; i < c.cfg.Retries; i++ {
 		creds, err = c.store.Refresh()
 		if err != nil {

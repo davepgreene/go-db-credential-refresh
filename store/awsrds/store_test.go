@@ -9,7 +9,7 @@ import (
 
 	"bou.ke/monkey"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/davecgh/go-spew/spew"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -121,7 +121,7 @@ func TestStoreValidation(t *testing.T) {
 		Endpoint:    "http://localhost:5432",
 		Region:      "us-east-1",
 		User:        "dbuser",
-		Credentials: aws.AnonymousCredentials,
+		Credentials: aws.AnonymousCredentials{},
 	}); err != nil {
 		t.Errorf("expected no error but got %v instead", err)
 	}
@@ -132,7 +132,7 @@ func TestValidStoreCanGenerateToken(t *testing.T) {
 		Endpoint:    "rdsmysql.cdgmuqiadpid.us-east-1.rds.amazonaws.com:5432",
 		Region:      "us-east-1",
 		User:        "dbuser",
-		Credentials: aws.NewStaticCredentialsProvider("foo", "bar", "baz"),
+		Credentials: credentials.NewStaticCredentialsProvider("foo", "bar", "baz"),
 	})
 	if err != nil {
 		t.Error(err)
@@ -156,7 +156,7 @@ func TestStoreErrorsOnUnsignableCredentials(t *testing.T) {
 		Endpoint:    "rdsmysql.cdgmuqiadpid.us-east-1.rds.amazonaws.com:5432",
 		Region:      "us-east-1",
 		User:        "dbuser",
-		Credentials: aws.AnonymousCredentials,
+		Credentials: aws.AnonymousCredentials{},
 	})
 	if err != nil {
 		t.Error(err)
@@ -171,7 +171,7 @@ func TestStoreCachesCredentials(t *testing.T) {
 		Endpoint:    "rdsmysql.cdgmuqiadpid.us-east-1.rds.amazonaws.com:5432",
 		Region:      "us-east-1",
 		User:        "dbuser",
-		Credentials: aws.NewStaticCredentialsProvider("foo", "bar", "baz"),
+		Credentials: credentials.NewStaticCredentialsProvider("foo", "bar", "baz"),
 	})
 	if err != nil {
 		t.Error(err)
@@ -200,7 +200,6 @@ func TestStoreCachesCredentials(t *testing.T) {
 	patch = monkey.Patch(time.Now, func() time.Time {
 		patch.Unpatch()
 		defer patch.Restore()
-		spew.Dump("called time.Now")
 		return time.Now().Add(20 * time.Minute)
 	})
 	defer patch.Unpatch()
@@ -218,14 +217,13 @@ func TestStoreCachesCredentials(t *testing.T) {
 		t.Errorf("expected password to be cached but got %s instead", cachedCreds.GetPassword())
 	}
 
-	// On refresh we should have a new password
+	// On refresh, we should have a new password
 	refreshedCreds, err := s.Refresh()
 	if err != nil {
 		t.Error(err)
 	}
 
 	if password == refreshedCreds.GetPassword() {
-		t.Error("cached password and refreshed password were the same but expected them not to be")
-		spew.Dump(password, refreshedCreds.GetPassword())
+		t.Error("cached password and refreshed password were the same but expected them not to be", password, refreshedCreds.GetPassword())
 	}
 }
