@@ -51,4 +51,4 @@ db.SetMaxOpenConns(5)
 
 With the `database/sql.DB` we can query the database, using the connector wrapped over the driver to manage retrieving dynamic credentials from Vault and using them to authenticate.
 
- See [`main.go`](./main.go) for the rest of the example.
+ See [`main.go`](main.go) for the rest of the example.
