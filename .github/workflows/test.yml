@@ -1,4 +1,4 @@
-name: Build
+name: Test
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     name: ${{ matrix.name }} - ${{ matrix.go }}
     strategy:
@@ -32,7 +32,7 @@ jobs:
           echo "::set-output name=go-build::$(go env GOCACHE)"
           echo "::set-output name=go-mod::$(go env GOMODCACHE)"
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go }}
         id: go
@@ -47,6 +47,10 @@ jobs:
         with:
           path: ${{ steps.go-cache-paths.outputs.go-mod }}
           key: ${{ runner.os }}-go-mod-${{ matrix.dir }}-${{ hashFiles('**/go.sum') }}
-      - name: Build
-        run: go build -mod=readonly -v ./...
+      - name: Test
         working-directory: ${{ matrix.dir }}
+        run: go test -mod=readonly ./... -coverprofile=coverage.txt
+      - name: Coverage
+        uses: codecov/codecov-action@v2
+        with:
+          file: ${{ matrix.dir }}/coverage.txt

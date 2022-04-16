@@ -1,6 +1,6 @@
 # Go DB Credential Refresh
 
-[![Godoc Reference](https://godoc.org/github.com/davepgreene/go-db-credential-refresh?status.svg)](https://pkg.go.dev/github.com/davepgreene/go-db-credential-refresh) ![Go](https://github.com/davepgreene/go-db-credential-refresh/workflows/Go/badge.svg) [![codecov](https://codecov.io/gh/davepgreene/go-db-credential-refresh/branch/master/graph/badge.svg)](https://codecov.io/gh/davepgreene/go-db-credential-refresh)
+[![Godoc Reference](https://godoc.org/github.com/davepgreene/go-db-credential-refresh?status.svg)](https://pkg.go.dev/github.com/davepgreene/go-db-credential-refresh) [![Test](https://github.com/davepgreene/go-db-credential-refresh/actions/workflows/test.yml/badge.svg)](https://github.com/davepgreene/go-db-credential-refresh/actions/workflows/test.yml) [![Lint](https://github.com/davepgreene/go-db-credential-refresh/actions/workflows/lint.yml/badge.svg)](https://github.com/davepgreene/go-db-credential-refresh/actions/workflows/lint.yml) [![codecov](https://codecov.io/gh/davepgreene/go-db-credential-refresh/branch/master/graph/badge.svg)](https://codecov.io/gh/davepgreene/go-db-credential-refresh)
 
 
 
