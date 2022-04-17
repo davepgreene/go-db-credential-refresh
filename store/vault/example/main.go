@@ -42,8 +42,11 @@ func main() {
 func Run() error {
 	var err error
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	// Set up Vault, DB backend, and Postgres configuration
-	ln, client, err := SetupVault()
+	ln, client, err := SetupVault(ctx)
 	if err != nil {
 		return err
 	}
@@ -81,16 +84,13 @@ func Run() error {
 	database.SetMaxIdleConns(2)
 	database.SetMaxOpenConns(5)
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	appSignal := make(chan os.Signal)
+	appSignal := make(chan os.Signal, 1)
 	signal.Notify(appSignal, os.Interrupt)
 
 	go func() {
 		<-appSignal
 		cancel()
-		err = TearDownRoles(client)
+		err = TearDownRoles(ctx, client)
 	}()
 
 	for {

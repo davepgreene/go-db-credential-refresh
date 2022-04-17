@@ -1,6 +1,8 @@
 package vaultcredentials
 
 import (
+	"context"
+
 	"github.com/hashicorp/vault/api"
 
 	"github.com/davepgreene/go-db-credential-refresh/store"
@@ -8,7 +10,7 @@ import (
 
 // CredentialLocation represents a location where credentials can be retrieved from.
 type CredentialLocation interface {
-	GetCredentials(client *api.Client) (string, error)
+	GetCredentials(ctx context.Context, client *api.Client) (string, error)
 	Map(s string) (*store.Credential, error)
 }
 

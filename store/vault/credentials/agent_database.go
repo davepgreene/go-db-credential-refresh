@@ -1,6 +1,7 @@
 package vaultcredentials
 
 import (
+	"context"
 	"io/ioutil"
 
 	"github.com/hashicorp/vault/api"
@@ -31,7 +32,7 @@ func NewAgentDatabaseCredentials(mapper Mapper, path string) CredentialLocation 
 }
 
 // GetCredentials implements the CredentialLocation interface.
-func (adb *AgentDatabaseCredentials) GetCredentials(_ *api.Client) (string, error) {
+func (adb *AgentDatabaseCredentials) GetCredentials(_ context.Context, _ *api.Client) (string, error) {
 	creds, err := ioutil.ReadFile(adb.path)
 	if err != nil {
 		return "", err

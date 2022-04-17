@@ -1,6 +1,7 @@
 package vaultauth
 
 import (
+	"context"
 	"testing"
 
 	"github.com/davepgreene/go-db-credential-refresh/store/vault/vaulttest"
@@ -11,7 +12,7 @@ func TestTokenAuth(t *testing.T) {
 	defer ln.Close()
 
 	ta := NewTokenAuth(client.Token())
-	token, err := ta.GetToken(client)
+	token, err := ta.GetToken(context.Background(), client)
 	if err != nil {
 		t.Error(err)
 	}
@@ -26,7 +27,7 @@ func TestTokenAuthWithInvalidToken(t *testing.T) {
 	defer ln.Close()
 
 	ta := NewTokenAuth("foobar")
-	if _, err := ta.GetToken(client); err == nil {
+	if _, err := ta.GetToken(context.Background(), client); err == nil {
 		t.Error("expected an error but didn't get one")
 	}
 }

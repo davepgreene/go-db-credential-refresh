@@ -1,6 +1,7 @@
 package vaultcredentials
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -12,8 +13,8 @@ var (
 )
 
 // GetFromVaultSecretsAPI is a wrapper over logical reads from a Vault path with marshalling and error handling.
-func GetFromVaultSecretsAPI(client *api.Client, path string) (string, error) {
-	resp, err := client.Logical().Read(path)
+func GetFromVaultSecretsAPI(ctx context.Context, client *api.Client, path string) (string, error) {
+	resp, err := client.Logical().ReadWithContext(ctx, path)
 	if err != nil {
 		return "", err
 	}

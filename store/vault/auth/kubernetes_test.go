@@ -1,6 +1,7 @@
 package vaultauth
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -85,13 +86,15 @@ func TestKubernetesAuth(t *testing.T) {
 	ln, client := vaulttest.CreateTestVault(t, nil)
 	defer ln.Close()
 
-	if _, err := client.Logical().Write("sys/auth/kubernetes", map[string]interface{}{
+	ctx := context.Background()
+
+	if _, err := client.Logical().WriteWithContext(ctx, "sys/auth/kubernetes", map[string]interface{}{
 		"type": "kubernetes",
 	}); err != nil {
 		t.Error(err)
 	}
 
-	if _, err := client.Logical().Write("auth/kubernetes/config", map[string]interface{}{
+	if _, err := client.Logical().WriteWithContext(ctx, "auth/kubernetes/config", map[string]interface{}{
 		"kubernetes_host":    srv.URL,
 		"kubernetes_ca_cert": testCACert,
 	}); err != nil {
@@ -101,7 +104,7 @@ func TestKubernetesAuth(t *testing.T) {
 	role := "example"
 	userName := strings.Split(jwtUsername, ":")
 
-	if _, err := client.Logical().Write(fmt.Sprintf("auth/kubernetes/role/%s", role), map[string]interface{}{
+	if _, err := client.Logical().WriteWithContext(ctx, fmt.Sprintf("auth/kubernetes/role/%s", role), map[string]interface{}{
 		"bound_service_account_names":      userName[len(userName)-1],
 		"bound_service_account_namespaces": "default",
 	}); err != nil {
@@ -122,7 +125,7 @@ func TestKubernetesAuth(t *testing.T) {
 	}
 
 	a := NewKubernetesAuth(role, tmpfile.Name())
-	token, err := a.GetToken(client)
+	token, err := a.GetToken(ctx, client)
 	if err != nil {
 		t.Error(err)
 	}
@@ -133,7 +136,7 @@ func TestKubernetesAuth(t *testing.T) {
 
 	// Verify the token
 	client.SetToken(token)
-	resp, err := client.Logical().Read(tokenSelfLookupPath)
+	resp, err := client.Logical().ReadWithContext(ctx, tokenSelfLookupPath)
 	if err != nil {
 		t.Error(err)
 	}
@@ -163,7 +166,7 @@ func TestKubernetesAuthFileError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	_, err = k.GetToken(client)
+	_, err = k.GetToken(context.Background(), client)
 	if err == nil {
 		t.Error("expected an error but didn't get one")
 	}
@@ -207,7 +210,7 @@ func TestKubernetesAuthVaultError(t *testing.T) {
 	}
 
 	k := NewKubernetesAuth("role", tmpfile.Name())
-	_, err = k.GetToken(client)
+	_, err = k.GetToken(context.Background(), client)
 	if err == nil {
 		t.Error("expected an error but didn't get one")
 	}

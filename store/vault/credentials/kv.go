@@ -1,6 +1,8 @@
 package vaultcredentials
 
 import (
+	"context"
+
 	"github.com/hashicorp/vault/api"
 
 	"github.com/davepgreene/go-db-credential-refresh/store"
@@ -19,8 +21,8 @@ func NewKvCredentials(path string) CredentialLocation {
 }
 
 // GetCredentials implements the CredentialLocation interface.
-func (kv *KvCredentials) GetCredentials(client *api.Client) (string, error) {
-	return GetFromVaultSecretsAPI(client, kv.path)
+func (kv *KvCredentials) GetCredentials(ctx context.Context, client *api.Client) (string, error) {
+	return GetFromVaultSecretsAPI(ctx, client, kv.path)
 }
 
 // Map implements the CredentialLocation interface.

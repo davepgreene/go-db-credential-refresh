@@ -21,20 +21,20 @@ const (
 )
 
 type testTokenLocation struct {
-	TokenGetter func(c *api.Client) (string, error)
+	TokenGetter func(ctx context.Context, c *api.Client) (string, error)
 }
 
-func (k *testTokenLocation) GetToken(client *api.Client) (string, error) {
-	return k.TokenGetter(client)
+func (k *testTokenLocation) GetToken(ctx context.Context, client *api.Client) (string, error) {
+	return k.TokenGetter(ctx, client)
 }
 
 type testCredentialLocation struct {
-	CredentialGetter func(c *api.Client) (string, error)
+	CredentialGetter func(ctx context.Context, c *api.Client) (string, error)
 	Mapper           func(s string) (*store.Credential, error)
 }
 
-func (tcl *testCredentialLocation) GetCredentials(client *api.Client) (string, error) {
-	return tcl.CredentialGetter(client)
+func (tcl *testCredentialLocation) GetCredentials(ctx context.Context, client *api.Client) (string, error) {
+	return tcl.CredentialGetter(ctx, client)
 }
 
 func (tcl *testCredentialLocation) Map(s string) (*store.Credential, error) {
@@ -80,7 +80,7 @@ func TestNewStoreCannotCreateWithoutValidConfig(t *testing.T) {
 	if _, err := NewStore(&Config{
 		Client: client,
 		TokenLocation: &testTokenLocation{
-			TokenGetter: func(c *api.Client) (string, error) {
+			TokenGetter: func(_ context.Context, _ *api.Client) (string, error) {
 				return "", errors.New("unable to get token")
 			},
 		},
@@ -101,12 +101,12 @@ func TestNewStoreWithValidConfig(t *testing.T) {
 	s, err := NewStore(&Config{
 		Client: client,
 		TokenLocation: &testTokenLocation{
-			TokenGetter: func(c *api.Client) (string, error) {
+			TokenGetter: func(_ context.Context, _ *api.Client) (string, error) {
 				return token, nil
 			},
 		},
 		CredentialLocation: &testCredentialLocation{
-			CredentialGetter: func(c *api.Client) (string, error) {
+			CredentialGetter: func(_ context.Context, _ *api.Client) (string, error) {
 				return fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password), nil
 			},
 			Mapper: vaultcredentials.DefaultMapper,
@@ -143,12 +143,12 @@ func TestNewStoreWithGetCredentialError(t *testing.T) {
 	s, err := NewStore(&Config{
 		Client: client,
 		TokenLocation: &testTokenLocation{
-			TokenGetter: func(c *api.Client) (string, error) {
+			TokenGetter: func(_ context.Context, _ *api.Client) (string, error) {
 				return token, nil
 			},
 		},
 		CredentialLocation: &testCredentialLocation{
-			CredentialGetter: func(c *api.Client) (string, error) {
+			CredentialGetter: func(_ context.Context, _ *api.Client) (string, error) {
 				return "", errors.New("could not get credentials")
 			},
 			Mapper: func(s string) (*store.Credential, error) {
@@ -181,12 +181,12 @@ func TestNewStoreWithCredentialMapperError(t *testing.T) {
 	s, err := NewStore(&Config{
 		Client: client,
 		TokenLocation: &testTokenLocation{
-			TokenGetter: func(c *api.Client) (string, error) {
+			TokenGetter: func(_ context.Context, _ *api.Client) (string, error) {
 				return token, nil
 			},
 		},
 		CredentialLocation: &testCredentialLocation{
-			CredentialGetter: func(c *api.Client) (string, error) {
+			CredentialGetter: func(_ context.Context, _ *api.Client) (string, error) {
 				return fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password), nil
 			},
 			Mapper: func(s string) (*store.Credential, error) {
@@ -212,7 +212,7 @@ func TestNewStoreWithClientThatAlreadyHasToken(t *testing.T) {
 	s, err := NewStore(&Config{
 		Client: client,
 		CredentialLocation: &testCredentialLocation{
-			CredentialGetter: func(c *api.Client) (string, error) {
+			CredentialGetter: func(_ context.Context, c *api.Client) (string, error) {
 				if c.Token() != client.Token() {
 					t.Fatalf("expected token to be '%s' but got '%s' instead", client.Token(), c.Token())
 				}
@@ -259,7 +259,7 @@ func TestNewStoreWithInvalidTokenLocation(t *testing.T) {
 	if _, err := NewStore(&Config{
 		Client: client,
 		CredentialLocation: &testCredentialLocation{
-			CredentialGetter: func(c *api.Client) (string, error) {
+			CredentialGetter: func(_ context.Context, _ *api.Client) (string, error) {
 				return "", nil
 			},
 			Mapper: func(s string) (*store.Credential, error) {
@@ -280,7 +280,7 @@ func TestStoreWithCachedCredentials(t *testing.T) {
 	s, err := NewStore(&Config{
 		Client: client,
 		CredentialLocation: &testCredentialLocation{
-			CredentialGetter: func(c *api.Client) (string, error) {
+			CredentialGetter: func(_ context.Context, _ *api.Client) (string, error) {
 				return fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password), nil
 			},
 			Mapper: func(s string) (*store.Credential, error) {

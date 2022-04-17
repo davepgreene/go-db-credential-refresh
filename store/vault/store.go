@@ -11,8 +11,9 @@ import (
 	vaultcredentials "github.com/davepgreene/go-db-credential-refresh/store/vault/credentials"
 )
 
+// TokenLocation is an interface describing how to get a Vault token
 type TokenLocation interface {
-	GetToken(client *api.Client) (string, error)
+	GetToken(ctx context.Context, client *api.Client) (string, error)
 }
 
 // Store is a Store implementation for HashiCorp Vault.
@@ -61,7 +62,7 @@ func NewStore(c *Config) (*Store, error) {
 		c.TokenLocation = vaultauth.NewTokenAuth(client.Token())
 	}
 
-	token, err := c.TokenLocation.GetToken(client)
+	token, err := c.TokenLocation.GetToken(context.TODO(), client)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +87,7 @@ func (v *Store) Get(ctx context.Context) (driver.Credentials, error) {
 
 // Refresh implements the store interface.
 func (v *Store) Refresh(ctx context.Context) (driver.Credentials, error) {
-	credStr, err := v.cl.GetCredentials(v.client)
+	credStr, err := v.cl.GetCredentials(ctx, v.client)
 	if err != nil {
 		return nil, err
 	}

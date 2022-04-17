@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
@@ -14,41 +15,47 @@ import (
 
 // SetupVault sets up an in-memory Vault core and webserver then enables the plugins/configs we need for
 // this example.
-func SetupVault() (net.Listener, *api.Client, error) {
+func SetupVault(ctx context.Context) (net.Listener, *api.Client, error) {
 	fmt.Println("Creating in-memory Vault instance")
 
 	t := &testing.T{}
 	ln, client := vaulttest.CreateTestVault(t, log.NewNullLogger())
 
 	fmt.Println("Mounting the database backend")
-	if _, err := client.Logical().Write("sys/mounts/database", map[string]interface{}{
-		"type": "database",
-	}); err != nil {
+	if _, err := client.Logical().WriteWithContext(ctx,
+		"sys/mounts/database",
+		map[string]interface{}{
+			"type": "database",
+		}); err != nil {
 		return nil, nil, err
 	}
 
 	uri := fmt.Sprintf("postgresql://{{username}}:{{password}}@%s:%d/?sslmode=disable", host, port)
 
 	fmt.Println("Configuring the postgres database and role")
-	if _, err := client.Logical().Write(fmt.Sprintf("database/config/%s", dbName), map[string]interface{}{
-		"plugin_name":    "postgresql-database-plugin",
-		"allowed_roles":  role,
-		"connection_url": uri,
-		"username":       username,
-		"password":       password,
-	}); err != nil {
+	if _, err := client.Logical().WriteWithContext(ctx,
+		fmt.Sprintf("database/config/%s", dbName),
+		map[string]interface{}{
+			"plugin_name":    "postgresql-database-plugin",
+			"allowed_roles":  role,
+			"connection_url": uri,
+			"username":       username,
+			"password":       password,
+		}); err != nil {
 		return nil, nil, err
 	}
 
-	if _, err := client.Logical().Write(fmt.Sprintf("database/roles/%s", role), map[string]interface{}{
-		"db_name": dbName,
-		"creation_statements": []string{
-			`CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'`,
-			`GRANT SELECT ON ALL TABLES IN SCHEMA public TO "{{name}}"`,
-		},
-		"default_ttl": "2s",
-		"max_ttl":     "5s",
-	}); err != nil {
+	if _, err := client.Logical().WriteWithContext(ctx,
+		fmt.Sprintf("database/roles/%s", role),
+		map[string]interface{}{
+			"db_name": dbName,
+			"creation_statements": []string{
+				`CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'`,
+				`GRANT SELECT ON ALL TABLES IN SCHEMA public TO "{{name}}"`,
+			},
+			"default_ttl": "2s",
+			"max_ttl":     "5s",
+		}); err != nil {
 		return nil, nil, err
 	}
 
@@ -58,11 +65,11 @@ func SetupVault() (net.Listener, *api.Client, error) {
 }
 
 // TearDownRoles invalidates any Vault leases which will delete those roles in the DB
-func TearDownRoles(client *api.Client) error {
+func TearDownRoles(ctx context.Context, client *api.Client) error {
 	fmt.Println("Removing existing roles from Vault before shutdown")
 
 	pathTemplate := "sys/leases/%s/database/creds/%s"
-	resp, err := client.Logical().List(fmt.Sprintf(pathTemplate, "lookup", role))
+	resp, err := client.Logical().ListWithContext(ctx, fmt.Sprintf(pathTemplate, "lookup", role))
 	if err != nil {
 		return err
 	}
@@ -77,7 +84,7 @@ func TearDownRoles(client *api.Client) error {
 			lease := l.(string)
 			fmt.Printf("Revoking lease %s...\n", lease)
 			leasePath := fmt.Sprintf("%s/%s", fmt.Sprintf(pathTemplate, "revoke", role), lease)
-			if _, err = client.Logical().Write(leasePath, nil); err != nil {
+			if _, err = client.Logical().WriteWithContext(ctx, leasePath, nil); err != nil {
 				return err
 			}
 			fmt.Printf("Successfully revoked lease %s...\n", lease)

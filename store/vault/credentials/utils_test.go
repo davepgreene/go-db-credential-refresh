@@ -1,6 +1,7 @@
 package vaultcredentials
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"testing"
@@ -12,8 +13,10 @@ func TestGetFromVaultSecretsAPI(t *testing.T) {
 	ln, client := vaulttest.CreateTestVault(t, nil)
 	defer ln.Close()
 
+	ctx := context.Background()
+
 	// Valid path with response
-	b, err := GetFromVaultSecretsAPI(client, "auth/token/lookup-self")
+	b, err := GetFromVaultSecretsAPI(ctx, client, "auth/token/lookup-self")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +41,7 @@ func TestGetFromVaultSecretsAPI(t *testing.T) {
 	}
 
 	// Invalid path
-	_, err = GetFromVaultSecretsAPI(client, "flerp/derp/herp")
+	_, err = GetFromVaultSecretsAPI(ctx, client, "flerp/derp/herp")
 	if err == nil {
 		t.Error("expected an error but didn't get one")
 	}
@@ -52,13 +55,15 @@ func TestGetFromVaultSecretsAPIWithVaultError(t *testing.T) {
 	ln, client := vaulttest.CreateTestVault(t, nil)
 	defer ln.Close()
 
-	if _, err := client.Logical().Write("secret/foo", map[string]interface{}{
+	ctx := context.Background()
+
+	if _, err := client.Logical().WriteWithContext(ctx, "secret/foo", map[string]interface{}{
 		"secret": "string",
 	}); err != nil {
 		t.Error(err)
 	}
 
-	if _, err := client.Logical().Write("sys/policy/restricted", map[string]interface{}{
+	if _, err := client.Logical().WriteWithContext(ctx, "sys/policy/restricted", map[string]interface{}{
 		"policy": `path "secret/foo" {
 			capabilities = ["deny"]
 		}`,
@@ -66,7 +71,7 @@ func TestGetFromVaultSecretsAPIWithVaultError(t *testing.T) {
 		t.Error(err)
 	}
 
-	resp, err := client.Logical().Write("auth/token/create", map[string]interface{}{
+	resp, err := client.Logical().WriteWithContext(ctx, "auth/token/create", map[string]interface{}{
 		"policies": []string{"restricted"},
 	})
 	if err != nil {
@@ -75,7 +80,7 @@ func TestGetFromVaultSecretsAPIWithVaultError(t *testing.T) {
 
 	client.SetToken(resp.Auth.ClientToken)
 
-	if resp, err := GetFromVaultSecretsAPI(client, "secret/foo"); err == nil {
+	if resp, err := GetFromVaultSecretsAPI(ctx, client, "secret/foo"); err == nil {
 		t.Errorf("expected an error but got '%s' as a response instead", resp)
 	}
 }

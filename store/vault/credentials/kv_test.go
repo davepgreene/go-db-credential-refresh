@@ -1,6 +1,7 @@
 package vaultcredentials
 
 import (
+	"context"
 	"testing"
 
 	"github.com/davepgreene/go-db-credential-refresh/store/vault/vaulttest"
@@ -10,11 +11,13 @@ func TestNewKvCredentials(t *testing.T) {
 	ln, client := vaulttest.CreateTestVault(t, nil)
 	defer ln.Close()
 
+	ctx := context.Background()
+
 	path := "secret/test"
 	username := "foo"
 	password := "bar"
 
-	if _, err := client.Logical().Write(path, map[string]interface{}{
+	if _, err := client.Logical().WriteWithContext(ctx, path, map[string]interface{}{
 		"username": username,
 		"password": password,
 	}); err != nil {
@@ -22,7 +25,7 @@ func TestNewKvCredentials(t *testing.T) {
 	}
 
 	kvc := NewKvCredentials(path)
-	credStr, err := kvc.GetCredentials(client)
+	credStr, err := kvc.GetCredentials(ctx, client)
 	if err != nil {
 		t.Error(err)
 	}

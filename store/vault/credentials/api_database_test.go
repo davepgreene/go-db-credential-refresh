@@ -1,6 +1,7 @@
 package vaultcredentials
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -11,12 +12,14 @@ func TestNewAPIDatabaseCredentials(t *testing.T) {
 	ln, client := vaulttest.CreateTestVault(t, nil)
 	defer ln.Close()
 
+	ctx := context.Background()
+
 	// Because this CredentialLocation is agnostic to the location of the actual credentials we can
 	// fudge this test by using the k/v secret type rather than building a mock vault plugin,
 	// mounting it as a db type, and dealing with vault's complicated "separate binary with gRPC
 	// communication" process.
 	// Instead we mount the k/v secret type at `database`.
-	if _, err := client.Logical().Write("sys/mounts/database", map[string]interface{}{
+	if _, err := client.Logical().WriteWithContext(ctx, "sys/mounts/database", map[string]interface{}{
 		"type": "kv",
 	}); err != nil {
 		t.Error(err)
@@ -24,7 +27,7 @@ func TestNewAPIDatabaseCredentials(t *testing.T) {
 
 	role := "postgres"
 
-	if _, err := client.Logical().Write(fmt.Sprintf("database/creds/%s", role), map[string]interface{}{
+	if _, err := client.Logical().WriteWithContext(ctx, fmt.Sprintf("database/creds/%s", role), map[string]interface{}{
 		"username": username,
 		"password": password,
 	}); err != nil {
@@ -32,7 +35,7 @@ func TestNewAPIDatabaseCredentials(t *testing.T) {
 	}
 
 	adc := NewAPIDatabaseCredentials(role, "")
-	credStr, err := adc.GetCredentials(client)
+	credStr, err := adc.GetCredentials(ctx, client)
 	if err != nil {
 		t.Error(err)
 	}

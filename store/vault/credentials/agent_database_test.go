@@ -1,6 +1,7 @@
 package vaultcredentials
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -45,7 +46,7 @@ func TestNewAgentDatabaseCredentials(t *testing.T) {
 
 	adc := NewAgentDatabaseCredentials(testMapper, tmpfile.Name())
 
-	credStr, err := adc.GetCredentials(nil)
+	credStr, err := adc.GetCredentials(context.Background(), nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -70,7 +71,7 @@ func TestNewAgentDatabaseCredentials(t *testing.T) {
 
 func TestNewAgentDatabaseCredentialsFailedFileRead(t *testing.T) {
 	adc := NewAgentDatabaseCredentials(testMapper, "")
-	credStr, err := adc.GetCredentials(nil)
+	credStr, err := adc.GetCredentials(context.Background(), nil)
 	if err == nil {
 		t.Error("expected an error but didn't get one")
 	}
@@ -97,7 +98,7 @@ func TestNewAgentDatabaseCredentialsFailedMapper(t *testing.T) {
 
 	adc := NewAgentDatabaseCredentials(testMapper, tmpfile.Name())
 
-	credStr, err := adc.GetCredentials(nil)
+	credStr, err := adc.GetCredentials(context.Background(), nil)
 	if err != nil {
 		t.Error(err)
 	}
