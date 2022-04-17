@@ -30,7 +30,7 @@ func NewConnector(s Store, driverName string, cfg *Config) (*Connector, error) {
 		return nil, ErrConfigRequired
 	}
 
-	d, fmt, authErr, err := CreateDriver(driverName)
+	d, err := CreateDriver(driverName)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func NewConnector(s Store, driverName string, cfg *Config) (*Connector, error) {
 	// Allow caller to override formatter. This makes it easier to use different DSN
 	// formats in cases where a default formatter might be difficult to use.
 	if cfg.Formatter != nil {
-		fmt = cfg.Formatter
+		d.Formatter = cfg.Formatter
 	}
 
 	// 0 retries means that it should try once, retry, then don't attempt any more retries
@@ -49,9 +49,9 @@ func NewConnector(s Store, driverName string, cfg *Config) (*Connector, error) {
 	return &Connector{
 		store:      s,
 		cfg:        cfg,
-		driver:     d,
-		errHandler: authErr,
-		formatter:  fmt,
+		driver:     d.Driver,
+		errHandler: d.AuthError,
+		formatter:  d.Formatter,
 		mu:         sync.Mutex{},
 	}, nil
 }

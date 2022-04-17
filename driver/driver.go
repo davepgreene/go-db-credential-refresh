@@ -12,7 +12,14 @@ import (
 	"github.com/lib/pq"
 )
 
-type factory func() (driver.Driver, Formatter, AuthError)
+// Driver carries information along with a database/sql/driver required for creating a Connector
+type Driver struct {
+	Driver    driver.Driver
+	Formatter Formatter
+	AuthError AuthError
+}
+
+type factory func() *Driver
 
 type errFactoryAlreadyRegistered struct {
 	name string
@@ -88,31 +95,44 @@ func drivers() []string {
 }
 
 // CreateDriver creates a Driver.
-func CreateDriver(name string) (driver.Driver, Formatter, AuthError, error) {
+func CreateDriver(name string) (*Driver, error) {
 	driverMu.Lock()
 
 	driverFactory, ok := driverFactories[name]
 	if !ok {
 		// Factory has not been registered.
 		driverMu.Unlock()
-		return nil, nil, nil, errInvalidDriverName
+
+		return nil, errInvalidDriverName
 	}
 	defer driverMu.Unlock()
 
 	// Run the factory
-	d, f, authError := driverFactory()
+	d := driverFactory()
 
-	return d, f, authError, nil
+	return d, nil
 }
 
-func mysqlDriver() (driver.Driver, Formatter, AuthError) {
-	return &mysql.MySQLDriver{}, MysqlFormatter, MySQLAuthError
+func mysqlDriver() *Driver {
+	return &Driver{
+		Driver:    &mysql.MySQLDriver{},
+		Formatter: MysqlFormatter,
+		AuthError: MySQLAuthError,
+	}
 }
 
-func pgxDriver() (driver.Driver, Formatter, AuthError) {
-	return &stdlib.Driver{}, PgFormatter, PostgreSQLAuthError
+func pgxDriver() *Driver {
+	return &Driver{
+		Driver:    &stdlib.Driver{},
+		Formatter: PgFormatter,
+		AuthError: PostgreSQLAuthError,
+	}
 }
 
-func pqDriver() (driver.Driver, Formatter, AuthError) {
-	return &pq.Driver{}, PgFormatter, PostgreSQLAuthError
+func pqDriver() *Driver {
+	return &Driver{
+		Driver:    &pq.Driver{},
+		Formatter: PgFormatter,
+		AuthError: PostgreSQLAuthError,
+	}
 }

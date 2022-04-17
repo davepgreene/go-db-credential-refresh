@@ -93,8 +93,12 @@ func (c *testCredential) GetPassword() string {
 
 func TestNewConnectorFailsWithNilConfig(t *testing.T) {
 	unregisterAllDrivers()
-	if err := Register("driver", func() (driver.Driver, Formatter, AuthError) {
-		return &testDriver{}, MysqlFormatter, errorTester(MysqlErrorText)
+	if err := Register("driver", func() *Driver {
+		return &Driver{
+			Driver:    &testDriver{},
+			Formatter: MysqlFormatter,
+			AuthError: errorTester(MysqlErrorText),
+		}
 	}); err != nil {
 		t.Error(err)
 	}
@@ -132,8 +136,12 @@ func TestNewConnectorWithInvalidDriver(t *testing.T) {
 
 func TestConnectorErrorsIfStoreGetFailsReturnsNilOrIsInvalid(t *testing.T) {
 	unregisterAllDrivers()
-	if err := Register("driver", func() (driver.Driver, Formatter, AuthError) {
-		return &testDriver{}, MysqlFormatter, errorTester(MysqlErrorText)
+	if err := Register("driver", func() *Driver {
+		return &Driver{
+			Driver:    &testDriver{},
+			Formatter: MysqlFormatter,
+			AuthError: errorTester(MysqlErrorText),
+		}
 	}); err != nil {
 		t.Error(err)
 	}
@@ -211,8 +219,12 @@ func TestConnectorErrorsIfStoreGetFailsReturnsNilOrIsInvalid(t *testing.T) {
 func TestConnectorCanUseAlternateFormatter(t *testing.T) {
 	unregisterAllDrivers()
 	d := &testDriver{}
-	if err := Register("driver", func() (driver.Driver, Formatter, AuthError) {
-		return d, MysqlFormatter, errorTester(MysqlErrorText)
+	if err := Register("driver", func() *Driver {
+		return &Driver{
+			Driver:    d,
+			Formatter: MysqlFormatter,
+			AuthError: errorTester(MysqlErrorText),
+		}
 	}); err != nil {
 		t.Error(err)
 	}
@@ -253,8 +265,12 @@ func TestConnectorCanUseAlternateFormatter(t *testing.T) {
 func TestConnectorRefreshesCredentialsCorrectly(t *testing.T) {
 	unregisterAllDrivers()
 	d := &testDriver{}
-	if err := Register("driver", func() (driver.Driver, Formatter, AuthError) {
-		return d, MysqlFormatter, errorTester(MysqlErrorText)
+	if err := Register("driver", func() *Driver {
+		return &Driver{
+			Driver:    d,
+			Formatter: MysqlFormatter,
+			AuthError: errorTester(MysqlErrorText),
+		}
 	}); err != nil {
 		t.Error(err)
 	}
@@ -294,8 +310,12 @@ func TestConnectorFailsToConnectThenReconnects(t *testing.T) {
 	d := &testFailingDriver{
 		ConnErr: errors.New(MysqlErrorText),
 	}
-	if err := Register("driver", func() (driver.Driver, Formatter, AuthError) {
-		return d, MysqlFormatter, errorTester(MysqlErrorText)
+	if err := Register("driver", func() *Driver {
+		return &Driver{
+			Driver:    d,
+			Formatter: MysqlFormatter,
+			AuthError: errorTester(MysqlErrorText),
+		}
 	}); err != nil {
 		t.Error(err)
 	}
@@ -336,8 +356,12 @@ func TestConnectorFailsToRefreshOnConnectionFailure(t *testing.T) {
 	d := &testFailingDriver{
 		ConnErr: errors.New(MysqlErrorText),
 	}
-	if err := Register("driver", func() (driver.Driver, Formatter, AuthError) {
-		return d, MysqlFormatter, errorTester(MysqlErrorText)
+	if err := Register("driver", func() *Driver {
+		return &Driver{
+			Driver:    d,
+			Formatter: MysqlFormatter,
+			AuthError: errorTester(MysqlErrorText),
+		}
 	}); err != nil {
 		t.Error(err)
 	}
@@ -390,8 +414,12 @@ func TestConnectorRetriesUntilSuccess(t *testing.T) {
 		MaxCalled: 3,
 	}
 
-	if err := Register("driver", func() (driver.Driver, Formatter, AuthError) {
-		return d, MysqlFormatter, errorTester(MysqlErrorText)
+	if err := Register("driver", func() *Driver {
+		return &Driver{
+			Driver:    d,
+			Formatter: MysqlFormatter,
+			AuthError: errorTester(MysqlErrorText),
+		}
 	}); err != nil {
 		t.Error(err)
 	}
@@ -457,8 +485,12 @@ func TestConnectorRetriesUntilMax(t *testing.T) {
 		MaxCalled: maxCalled,
 	}
 
-	if err := Register("driver", func() (driver.Driver, Formatter, AuthError) {
-		return d, MysqlFormatter, errorTester(MysqlErrorText)
+	if err := Register("driver", func() *Driver {
+		return &Driver{
+			Driver:    d,
+			Formatter: MysqlFormatter,
+			AuthError: errorTester(MysqlErrorText),
+		}
 	}); err != nil {
 		t.Error(err)
 	}
@@ -522,8 +554,12 @@ func TestConnectorRetriesUntilNonAuthError(t *testing.T) {
 		MaxCalled: maxCalled,
 	}
 
-	if err := Register("driver", func() (driver.Driver, Formatter, AuthError) {
-		return d, MysqlFormatter, errorTester(MysqlErrorText)
+	if err := Register("driver", func() *Driver {
+		return &Driver{
+			Driver:    d,
+			Formatter: MysqlFormatter,
+			AuthError: errorTester(MysqlErrorText),
+		}
 	}); err != nil {
 		t.Error(err)
 	}
@@ -577,8 +613,12 @@ func TestConnectorErrorsIfUnknownDBErrorMessage(t *testing.T) {
 	d := &testFailingDriver{
 		ConnErr: errors.New(""),
 	}
-	if err := Register("driver", func() (driver.Driver, Formatter, AuthError) {
-		return d, MysqlFormatter, errorTester(MysqlErrorText)
+	if err := Register("driver", func() *Driver {
+		return &Driver{
+			Driver:    d,
+			Formatter: MysqlFormatter,
+			AuthError: errorTester(MysqlErrorText),
+		}
 	}); err != nil {
 		t.Error(err)
 	}

@@ -1,7 +1,6 @@
 package driver
 
 import (
-	"database/sql/driver"
 	"errors"
 	"strings"
 	"testing"
@@ -49,8 +48,8 @@ func TestCanRegisterAValidFactory(t *testing.T) {
 		}
 	}()
 
-	var fn factory = func() (driver.Driver, Formatter, AuthError) {
-		return nil, nil, nil
+	var fn factory = func() *Driver {
+		return &Driver{}
 	}
 
 	Register("a driver", fn) //nolint:errcheck
@@ -62,8 +61,8 @@ func TestCanRegisterAValidFactory(t *testing.T) {
 
 func TestCantRegisterMultipleFactoriesWithTheSameName(t *testing.T) {
 	unregisterAllDrivers()
-	var fn factory = func() (driver.Driver, Formatter, AuthError) {
-		return nil, nil, nil
+	var fn factory = func() *Driver {
+		return &Driver{}
 	}
 
 	if err := Register(driverName, fn); err != nil {
@@ -82,8 +81,12 @@ func TestCantRegisterMultipleFactoriesWithTheSameName(t *testing.T) {
 func TestCanCreateADriverInstance(t *testing.T) {
 	unregisterAllDrivers()
 
-	if err := Register("a driver", func() (driver.Driver, Formatter, AuthError) {
-		return nil, MysqlFormatter, func(e error) bool { return true }
+	if err := Register("a driver", func() *Driver {
+		return &Driver{
+			Driver:    nil,
+			Formatter: MysqlFormatter,
+			AuthError: func(e error) bool { return true },
+		}
 	}); err != nil {
 		t.Error(err)
 	}
@@ -93,21 +96,21 @@ func TestCanCreateADriverInstance(t *testing.T) {
 		t.Errorf("expected one driver to be registered but got %d", len(ds))
 	}
 
-	d, f, a, err := CreateDriver("a driver")
+	d, err := CreateDriver("a driver")
 	if err != nil {
 		t.Error(err)
 	}
 
-	if d != nil {
+	if d.Driver != nil {
 		t.Errorf("expected a nil driver but got %v", d)
 	}
 
 	// test formatter
-	if f("user", "pass", "host", 0, "", nil) != MysqlFormatter("user", "pass", "host", 0, "", nil) {
+	if d.Formatter("user", "pass", "host", 0, "", nil) != MysqlFormatter("user", "pass", "host", 0, "", nil) {
 		t.Error("Formatter should be mysqlFormatter but wasn't")
 	}
 
-	if !a(errors.New("foo")) {
+	if !d.AuthError(errors.New("foo")) {
 		t.Error("AuthError should be true but wasn't")
 	}
 }
@@ -115,7 +118,7 @@ func TestCanCreateADriverInstance(t *testing.T) {
 func TestCantCreateMissingDriver(t *testing.T) {
 	unregisterAllDrivers()
 
-	_, _, _, err := CreateDriver("a driver") //nolint:dogsled
+	_, err := CreateDriver("a driver") //nolint:dogsled
 	if err == nil {
 		t.Error("expected an error but didn't get one")
 	}
