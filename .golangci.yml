@@ -2,22 +2,57 @@ linters:
   disable-all: true
   enable:
     - govet
+    - deadcode
     - vet
     - staticcheck
     - revive
     - errcheck
     - ineffassign
     - misspell
-#
-#issues:
-#  exclude-rules:
-#    - path: _test\.go
-#      linters:
-#        - goerr113
-#        - gochecknoglobals
-#        - wsl
-#        - lll
-#        - funlen
+    - nlreturn
+    - gosec
 
 run:
   timeout: 5m
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - funlen
+        - bodyclose
+        - gosec
+        - revive
+    - path: example/
+      text: "avoid magic numbers"
+
+linters-settings:
+  revive:
+    enable-all-rules: true
+    rules:
+      - name: cognitive-complexity
+        disabled: true
+      - name: line-length-limit
+        arguments: [120]
+      - name: function-length
+        arguments: [50, 0]
+      - name: argument-limit
+        disabled: true
+      - name: banned-characters
+        disabled: true
+      - name: cyclomatic
+        arguments: [15]
+      - name: function-result-limit
+        arguments: [3]
+      - name: max-public-structs
+        arguments: [3]
+      - name: file-header
+        disabled: true
+      - name: add-constant
+        arguments:
+          - allowStrs: '""'
+            allowInts: "0,1,2"
+      - name: unhandled-error
+        arguments:
+          - "fmt.Printf"
+          - "fmt.Println"

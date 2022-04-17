@@ -89,6 +89,7 @@ func TestFormatters(t *testing.T) {
 				if dsn != testCase.expectedDsn {
 					t.Fatalf("expected %s but got %s", testCase.expectedDsn, dsn)
 				}
+
 				return
 			}
 			// Because url.Values is a map[string][]string we get randomized ordering before encoding so we

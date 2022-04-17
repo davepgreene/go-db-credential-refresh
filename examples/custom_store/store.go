@@ -8,10 +8,10 @@ import (
 	"github.com/davepgreene/go-db-credential-refresh/driver"
 )
 
-// ResponseHandler
+// ResponseHandler is a function type that retrieves credentials from a HTTP response
 type ResponseHandler func(r *http.Response) (driver.Credentials, error)
 
-// HTTPTestConnectingStore
+// HTTPTestConnectingStore is a store implementation that connects to an endpoint to retrieve credentials
 type HTTPTestConnectingStore struct {
 	url     string
 	method  string
@@ -19,8 +19,8 @@ type HTTPTestConnectingStore struct {
 	handler ResponseHandler
 }
 
-// NewHTTPTestConnectingStore
-func NewHTTPTestConnectingStore(url, method string, headers http.Header, handler ResponseHandler) (*HTTPTestConnectingStore, error) {
+// NewHTTPTestConnectingStore creates a new instance of a HTTPTestConnectingStore
+func NewHTTPTestConnectingStore(url, method string, headers http.Header, handler ResponseHandler) (*HTTPTestConnectingStore, error) { //nolint:revive
 	if handler == nil {
 		return nil, errors.New("handler must be implemented")
 	}
@@ -33,10 +33,12 @@ func NewHTTPTestConnectingStore(url, method string, headers http.Header, handler
 	}, nil
 }
 
+// Get implements driver.Store
 func (h *HTTPTestConnectingStore) Get(ctx context.Context) (driver.Credentials, error) {
 	return h.Refresh(ctx)
 }
 
+// Refresh implements driver.Store
 func (h *HTTPTestConnectingStore) Refresh(ctx context.Context) (driver.Credentials, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest(h.method, h.url, nil)

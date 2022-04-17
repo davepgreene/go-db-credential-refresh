@@ -106,7 +106,8 @@ func TestCanCreateADriverInstance(t *testing.T) {
 	}
 
 	// test formatter
-	if d.Formatter("user", "pass", "host", 0, "", nil) != MysqlFormatter("user", "pass", "host", 0, "", nil) {
+	expectedFormatter := MysqlFormatter("user", "pass", "host", 0, "", nil)
+	if d.Formatter("user", "pass", "host", 0, "", nil) != expectedFormatter {
 		t.Error("Formatter should be mysqlFormatter but wasn't")
 	}
 
