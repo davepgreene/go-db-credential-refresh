@@ -25,6 +25,7 @@ var testMapper Mapper = func(s string) (*store.Credential, error) {
 			Password: creds[1],
 		}, nil
 	}
+
 	return nil, errors.New("mapping function failed")
 }
 

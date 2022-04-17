@@ -216,6 +216,7 @@ func TestNewStoreWithClientThatAlreadyHasToken(t *testing.T) {
 				if c.Token() != client.Token() {
 					t.Fatalf("expected token to be '%s' but got '%s' instead", client.Token(), c.Token())
 				}
+
 				return fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password), nil
 			},
 			Mapper: vaultcredentials.DefaultMapper,
@@ -285,6 +286,7 @@ func TestStoreWithCachedCredentials(t *testing.T) {
 			},
 			Mapper: func(s string) (*store.Credential, error) {
 				mapCallCount++
+
 				return vaultcredentials.DefaultMapper(s)
 			},
 		},

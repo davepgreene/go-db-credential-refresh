@@ -26,6 +26,6 @@ func (kv *KvCredentials) GetCredentials(ctx context.Context, client *api.Client)
 }
 
 // Map implements the CredentialLocation interface.
-func (kv *KvCredentials) Map(s string) (*store.Credential, error) {
+func (*KvCredentials) Map(s string) (*store.Credential, error) {
 	return DefaultMapper(s)
 }

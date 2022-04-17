@@ -52,18 +52,21 @@ qQYZl8EZf4Jznaes/XFP0Yb+IhGXBoR9Ib+I
 func tokenReviewHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/apis/authentication.k8s.io/v1/tokenreviews" {
 		w.WriteHeader(404)
+
 		return
 	}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(500)
+
 		return
 	}
-	defer r.Body.Close()
+	defer r.Body.Close() //nolint:errcheck
 
 	var tr authv1.TokenReview
 	if err := json.Unmarshal(body, &tr); err != nil {
 		w.WriteHeader(500)
+
 		return
 	}
 
@@ -84,7 +87,7 @@ func TestKubernetesAuth(t *testing.T) {
 	defer srv.Close()
 
 	ln, client := vaulttest.CreateTestVault(t, nil)
-	defer ln.Close()
+	defer ln.Close() //nolint:errcheck
 
 	ctx := context.Background()
 
@@ -115,7 +118,7 @@ func TestKubernetesAuth(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer os.Remove(tmpfile.Name())
+	defer os.Remove(tmpfile.Name()) //nolint:errcheck
 
 	if _, err = tmpfile.Write([]byte(jwtData)); err != nil {
 		t.Error(err)
@@ -182,9 +185,9 @@ func TestKubernetesAuthFileError(t *testing.T) {
 }
 
 func TestKubernetesAuthVaultError(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc((func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(404)
-	})))
+	}))
 	defer srv.Close()
 
 	client, err := api.NewClient(nil)
@@ -200,7 +203,7 @@ func TestKubernetesAuthVaultError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer os.Remove(tmpfile.Name())
+	defer os.Remove(tmpfile.Name()) //nolint:errcheck
 
 	if _, err = tmpfile.Write([]byte(jwtData)); err != nil {
 		t.Error(err)

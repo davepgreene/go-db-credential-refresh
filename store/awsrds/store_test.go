@@ -17,7 +17,7 @@ import (
 func TestStoreValidation(t *testing.T) {
 	if _, err := NewStore(nil); err == nil {
 		t.Error("expected an error but didn't get one")
-	} else if err != errMissingConfig {
+	} else if !errors.Is(err, errMissingConfig) {
 		t.Errorf("expected '%T' but got '%T' instead", errMissingConfig, err)
 	}
 
@@ -103,12 +103,14 @@ func TestStoreValidation(t *testing.T) {
 			_, err = NewStore(&conf)
 			if err == nil {
 				t.Error("expected an error but didn't get one")
+
 				return
 			}
 
 			// If we have a pointer to an error we need to compare error strings
 			if reflect.ValueOf(testCase.expectedErr).Kind() == reflect.Ptr && err.Error() != testCase.expectedErr.Error() {
 				t.Errorf("expected '%v' but got '%v' instead", testCase.expectedErr, err)
+
 				return
 			}
 
@@ -209,6 +211,7 @@ func TestStoreCachesCredentials(t *testing.T) {
 	patch = monkey.Patch(time.Now, func() time.Time {
 		patch.Unpatch()
 		defer patch.Restore()
+
 		return time.Now().Add(20 * time.Minute)
 	})
 	defer patch.Unpatch()

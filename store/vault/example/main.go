@@ -98,6 +98,7 @@ func Run() error {
 		err = db.Ping(ctx, database)
 		if err != nil {
 			fmt.Println(err)
+
 			break
 		}
 
@@ -110,6 +111,7 @@ func Run() error {
 		})
 		if err != nil {
 			fmt.Println(err)
+
 			break
 		}
 

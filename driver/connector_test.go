@@ -39,6 +39,7 @@ type testDriver struct {
 func (d *testDriver) Open(dsn string) (driver.Conn, error) {
 	d.Called++
 	d.ConnStr = dsn
+
 	return d.Conn, d.ConnErr
 }
 
@@ -56,6 +57,7 @@ func (fd *testFailingDriver) Open(dsn string) (driver.Conn, error) {
 	if fd.Called == 1 {
 		return nil, fd.ConnErr
 	}
+
 	return nil, nil
 }
 
@@ -384,6 +386,7 @@ func TestConnectorFailsToRefreshOnConnectionFailure(t *testing.T) {
 		},
 		Refresher: func(ctx context.Context) (Credentials, error) {
 			refreshCalled++
+
 			return nil, errors.New("failed to refresh creds")
 		},
 	}, "driver", &cfg)
@@ -449,6 +452,7 @@ func TestConnectorRetriesUntilSuccess(t *testing.T) {
 					Password: password,
 				}, nil
 			}
+
 			return nil, errors.New("failed to refresh creds")
 		},
 	}, "driver", &cfg)
@@ -514,6 +518,7 @@ func TestConnectorRetriesUntilMax(t *testing.T) {
 		},
 		Refresher: func(ctx context.Context) (Credentials, error) {
 			refreshCalled++
+
 			return &testCredential{
 				Username: username,
 				Password: password,
@@ -583,6 +588,7 @@ func TestConnectorRetriesUntilNonAuthError(t *testing.T) {
 		},
 		Refresher: func(ctx context.Context) (Credentials, error) {
 			refreshCalled++
+
 			return &testCredential{
 				Username: username,
 				Password: password,
