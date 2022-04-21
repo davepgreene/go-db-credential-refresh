@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/vault-plugin-auth-kubernetes v0.12.0
 	github.com/hashicorp/vault/api v1.5.0
 	github.com/hashicorp/vault/sdk v0.4.2-0.20220321211954-d7083ad326db
-	k8s.io/api v0.23.5
+	k8s.io/api v0.23.6
 )
 
 require (
@@ -198,7 +198,7 @@ require (
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	k8s.io/apimachinery v0.23.5 // indirect
+	k8s.io/apimachinery v0.23.6 // indirect
 	k8s.io/client-go v0.22.2 // indirect
 	k8s.io/klog/v2 v2.30.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65 // indirect
