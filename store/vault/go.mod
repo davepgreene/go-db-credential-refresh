@@ -7,10 +7,10 @@ replace github.com/davepgreene/go-db-credential-refresh => ../../
 require (
 	github.com/davepgreene/go-db-credential-refresh v0.0.0-00010101000000-000000000000
 	github.com/hashicorp/go-hclog v1.2.0
-	github.com/hashicorp/vault v1.10.0
+	github.com/hashicorp/vault v1.10.3
 	github.com/hashicorp/vault-plugin-auth-kubernetes v0.12.0
 	github.com/hashicorp/vault/api v1.5.0
-	github.com/hashicorp/vault/sdk v0.4.2-0.20220321211954-d7083ad326db
+	github.com/hashicorp/vault/sdk v0.4.2-0.20220429220057-bdb59a36e632
 	k8s.io/api v0.23.5
 )
 
@@ -90,10 +90,10 @@ require (
 	github.com/hashicorp/go-raftchunking v0.6.3-0.20191002164813-7e9e8525653a // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
 	github.com/hashicorp/go-rootcerts v1.0.2 // indirect
-	github.com/hashicorp/go-secure-stdlib/awsutil v0.1.5 // indirect
+	github.com/hashicorp/go-secure-stdlib/awsutil v0.1.6 // indirect
 	github.com/hashicorp/go-secure-stdlib/base62 v0.1.2 // indirect
 	github.com/hashicorp/go-secure-stdlib/mlock v0.1.2 // indirect
-	github.com/hashicorp/go-secure-stdlib/parseutil v0.1.3 // indirect
+	github.com/hashicorp/go-secure-stdlib/parseutil v0.1.4 // indirect
 	github.com/hashicorp/go-secure-stdlib/reloadutil v0.1.1 // indirect
 	github.com/hashicorp/go-secure-stdlib/strutil v0.1.2 // indirect
 	github.com/hashicorp/go-secure-stdlib/tlsutil v0.1.1 // indirect
@@ -106,7 +106,7 @@ require (
 	github.com/hashicorp/raft v1.3.3 // indirect
 	github.com/hashicorp/raft-autopilot v0.1.3 // indirect
 	github.com/hashicorp/raft-boltdb/v2 v2.0.0-20210421194847-a7e34179d62c // indirect
-	github.com/hashicorp/raft-snapshot v1.0.3 // indirect
+	github.com/hashicorp/raft-snapshot v1.0.4 // indirect
 	github.com/hashicorp/vic v1.5.1-0.20190403131502-bbfe86ec9443 // indirect
 	github.com/hashicorp/yamux v0.0.0-20211028200310-0bc27b27de87 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
