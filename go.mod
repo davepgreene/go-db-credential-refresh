@@ -7,7 +7,7 @@ require (
 	github.com/go-test/deep v1.0.8
 	github.com/jackc/pgx/v4 v4.15.0
 	github.com/kr/pretty v0.3.0 // indirect
-	github.com/lib/pq v1.10.5
+	github.com/lib/pq v1.10.6
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rogpeppe/go-internal v1.6.2 // indirect
 	golang.org/x/crypto v0.0.0-20220208050332-20e1d8d225ab // indirect
