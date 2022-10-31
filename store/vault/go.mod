@@ -9,8 +9,8 @@ require (
 	github.com/hashicorp/go-hclog v1.2.0
 	github.com/hashicorp/vault v1.10.0
 	github.com/hashicorp/vault-plugin-auth-kubernetes v0.12.0
-	github.com/hashicorp/vault/api v1.5.0
-	github.com/hashicorp/vault/sdk v0.4.2-0.20220321211954-d7083ad326db
+	github.com/hashicorp/vault/api v1.8.2
+	github.com/hashicorp/vault/sdk v0.6.0
 	k8s.io/api v0.23.5
 )
 
@@ -82,18 +82,18 @@ require (
 	github.com/hashicorp/go-discover v0.0.0-20210818145131-c573d69da192 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-kms-wrapping v0.7.0 // indirect
-	github.com/hashicorp/go-kms-wrapping/entropy v0.1.0 // indirect
+	github.com/hashicorp/go-kms-wrapping/entropy/v2 v2.0.0 // indirect
 	github.com/hashicorp/go-memdb v1.3.2 // indirect
 	github.com/hashicorp/go-msgpack v1.1.5 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/hashicorp/go-plugin v1.4.3 // indirect
+	github.com/hashicorp/go-plugin v1.4.5 // indirect
 	github.com/hashicorp/go-raftchunking v0.6.3-0.20191002164813-7e9e8525653a // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
 	github.com/hashicorp/go-rootcerts v1.0.2 // indirect
 	github.com/hashicorp/go-secure-stdlib/awsutil v0.1.5 // indirect
 	github.com/hashicorp/go-secure-stdlib/base62 v0.1.2 // indirect
 	github.com/hashicorp/go-secure-stdlib/mlock v0.1.2 // indirect
-	github.com/hashicorp/go-secure-stdlib/parseutil v0.1.3 // indirect
+	github.com/hashicorp/go-secure-stdlib/parseutil v0.1.6 // indirect
 	github.com/hashicorp/go-secure-stdlib/reloadutil v0.1.1 // indirect
 	github.com/hashicorp/go-secure-stdlib/strutil v0.1.2 // indirect
 	github.com/hashicorp/go-secure-stdlib/tlsutil v0.1.1 // indirect
@@ -136,7 +136,7 @@ require (
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.0 // indirect
-	github.com/mitchellh/mapstructure v1.4.3 // indirect
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
@@ -183,9 +183,9 @@ require (
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20220207234003-57398862261d // indirect
+	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/text v0.3.8 // indirect
 	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
 	google.golang.org/api v0.30.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
