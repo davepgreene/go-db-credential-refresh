@@ -3,7 +3,7 @@ module github.com/davepgreene/go-db-credential-refresh
 go 1.15
 
 require (
-	github.com/go-sql-driver/mysql v1.6.0
+	github.com/go-sql-driver/mysql v1.7.0
 	github.com/go-test/deep v1.0.8
 	github.com/jackc/pgx/v4 v4.15.0
 	github.com/kr/pretty v0.3.0 // indirect
