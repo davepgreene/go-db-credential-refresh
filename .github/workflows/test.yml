@@ -12,7 +12,7 @@ jobs:
     name: ${{ matrix.name }} - ${{ matrix.go }}
     strategy:
       matrix:
-        go: ["1.15.x", "1.16.x", "1.17.x", "1.18.x"]
+        go: ["1.17.x", "1.18.x", "1.19.x", "1.20.x"]
         dir: [".", "./store/awsrds", "./store/vault"]
         include:
           - dir: "."
@@ -21,11 +21,6 @@ jobs:
             name: "store/awsrds"
           - dir: "./store/vault"
             name: "store/vault"
-        exclude:
-          - dir: "./store/vault"
-            go: "1.15.x"
-          - dir: "./store/vault"
-            go: "1.16.x"
     steps:
       - id: go-cache-paths
         run: |
