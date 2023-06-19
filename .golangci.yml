@@ -2,7 +2,6 @@ linters:
   disable-all: true
   enable:
     - govet
-    - deadcode
     - vet
     - staticcheck
     - revive
