@@ -21,36 +21,16 @@ jobs:
             name: "store/awsrds"
           - dir: "./store/vault"
             name: "store/vault"
-        exclude:
-          - dir: "./store/vault"
-            go: "1.15.x"
-          - dir: "./store/vault"
-            go: "1.16.x"
     steps:
-      - id: go-cache-paths
-        run: |
-          echo "::set-output name=go-build::$(go env GOCACHE)"
-          echo "::set-output name=go-mod::$(go env GOMODCACHE)"
-      - name: Set up Go
-        uses: actions/setup-go@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go }}
-        id: go
-      - uses: actions/checkout@v3
-      - name: Go Build Cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.go-cache-paths.outputs.go-build }}
-          key: ${{ runner.os }}-go-build-${{ matrix.dir }}-${{ hashFiles('**/go.sum') }}
-      - name: Go Mod Cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.go-cache-paths.outputs.go-mod }}
-          key: ${{ runner.os }}-go-mod-${{ matrix.dir }}-${{ hashFiles('**/go.sum') }}
+          cache-dependency-path: "${{ matrix.dir }}/go.sum"
       - name: Test
         working-directory: ${{ matrix.dir }}
         run: go test -mod=readonly ./... -coverprofile=coverage.txt
       - name: Coverage
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           file: ${{ matrix.dir }}/coverage.txt
