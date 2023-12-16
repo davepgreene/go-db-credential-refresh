@@ -10,7 +10,7 @@ import (
 )
 
 func TestGetFromVaultSecretsAPI(t *testing.T) {
-	ln, client := vaulttest.CreateTestVault(t, nil)
+	ln, client := vaulttest.CreateTestVault(t)
 	defer ln.Close()
 
 	ctx := context.Background()
@@ -52,7 +52,7 @@ func TestGetFromVaultSecretsAPI(t *testing.T) {
 }
 
 func TestGetFromVaultSecretsAPIWithVaultError(t *testing.T) {
-	ln, client := vaulttest.CreateTestVault(t, nil)
+	ln, client := vaulttest.CreateTestVault(t)
 	defer ln.Close()
 
 	ctx := context.Background()

@@ -8,7 +8,7 @@ import (
 )
 
 func TestTokenAuth(t *testing.T) {
-	ln, client := vaulttest.CreateTestVault(t, nil)
+	ln, client := vaulttest.CreateTestVault(t)
 	defer ln.Close()
 
 	ta := NewTokenAuth(client.Token())
@@ -23,7 +23,7 @@ func TestTokenAuth(t *testing.T) {
 }
 
 func TestTokenAuthWithInvalidToken(t *testing.T) {
-	ln, client := vaulttest.CreateTestVault(t, nil)
+	ln, client := vaulttest.CreateTestVault(t)
 	defer ln.Close()
 
 	ta := NewTokenAuth("foobar")

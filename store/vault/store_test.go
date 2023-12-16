@@ -206,7 +206,7 @@ func TestNewStoreWithCredentialMapperError(t *testing.T) {
 }
 
 func TestNewStoreWithClientThatAlreadyHasToken(t *testing.T) {
-	ln, client := vaulttest.CreateTestVault(t, nil)
+	ln, client := vaulttest.CreateTestVault(t)
 	defer ln.Close()
 
 	s, err := NewStore(&Config{
@@ -273,7 +273,7 @@ func TestNewStoreWithInvalidTokenLocation(t *testing.T) {
 }
 
 func TestStoreWithCachedCredentials(t *testing.T) {
-	ln, client := vaulttest.CreateTestVault(t, nil)
+	ln, client := vaulttest.CreateTestVault(t)
 	defer ln.Close()
 
 	mapCallCount := 0

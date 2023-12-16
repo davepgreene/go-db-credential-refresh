@@ -6,7 +6,6 @@ replace github.com/davepgreene/go-db-credential-refresh => ../../
 
 require (
 	github.com/davepgreene/go-db-credential-refresh v1.0.0
-	github.com/hashicorp/go-hclog v1.2.0
 	github.com/hashicorp/vault v1.10.0
 	github.com/hashicorp/vault-plugin-auth-kubernetes v0.12.0
 	github.com/hashicorp/vault/api v1.5.0
@@ -80,6 +79,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-discover v0.0.0-20210818145131-c573d69da192 // indirect
+	github.com/hashicorp/go-hclog v1.2.0 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-kms-wrapping v0.7.0 // indirect
 	github.com/hashicorp/go-kms-wrapping/entropy v0.1.0 // indirect

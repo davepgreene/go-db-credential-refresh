@@ -7,7 +7,6 @@ import (
 	"net"
 	"testing"
 
-	log "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/vault/api"
 
 	"github.com/davepgreene/go-db-credential-refresh/store/vault/vaulttest"
@@ -19,7 +18,7 @@ func SetupVault(ctx context.Context) (net.Listener, *api.Client, error) {
 	fmt.Println("Creating in-memory Vault instance")
 
 	t := &testing.T{}
-	ln, client := vaulttest.CreateTestVault(t, log.NewNullLogger())
+	ln, client := vaulttest.CreateTestVault(t)
 
 	fmt.Println("Mounting the database backend")
 	if _, err := client.Logical().WriteWithContext(ctx,

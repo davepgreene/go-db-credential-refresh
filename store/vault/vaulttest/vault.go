@@ -4,7 +4,6 @@ import (
 	"net"
 	"testing"
 
-	log "github.com/hashicorp/go-hclog"
 	credKube "github.com/hashicorp/vault-plugin-auth-kubernetes"
 	"github.com/hashicorp/vault/api"
 	"github.com/hashicorp/vault/builtin/logical/database"
@@ -13,7 +12,7 @@ import (
 	"github.com/hashicorp/vault/vault"
 )
 
-func CreateTestVault(t *testing.T, l log.Logger) (net.Listener, *api.Client) {
+func CreateTestVault(t *testing.T) (net.Listener, *api.Client) {
 	t.Helper()
 
 	coreConf := &vault.CoreConfig{
@@ -23,10 +22,6 @@ func CreateTestVault(t *testing.T, l log.Logger) (net.Listener, *api.Client) {
 		LogicalBackends: map[string]logical.Factory{
 			"database": database.Factory,
 		},
-	}
-
-	if l != nil {
-		coreConf.Logger = l
 	}
 
 	core, keyShares, rootToken := vault.TestCoreUnsealedWithConfig(t, coreConf)

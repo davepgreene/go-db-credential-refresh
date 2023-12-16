@@ -86,7 +86,7 @@ func TestKubernetesAuth(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(tokenReviewHandler))
 	defer srv.Close()
 
-	ln, client := vaulttest.CreateTestVault(t, nil)
+	ln, client := vaulttest.CreateTestVault(t)
 	defer ln.Close() //nolint:errcheck
 
 	ctx := context.Background()
