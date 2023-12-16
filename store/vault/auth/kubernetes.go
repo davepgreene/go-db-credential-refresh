@@ -36,7 +36,7 @@ func (k *KubernetesAuth) GetToken(ctx context.Context, client *api.Client) (stri
 		return "", err
 	}
 
-	secret, err := client.Logical().WriteWithContext(ctx, "auth/kubernetes/login", map[string]interface{}{
+	secret, err := client.Logical().WriteWithContext(ctx, "auth/kubernetes/login", map[string]any{
 		"jwt":  string(token),
 		"role": k.role,
 	})

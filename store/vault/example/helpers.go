@@ -23,7 +23,7 @@ func SetupVault(ctx context.Context) (net.Listener, *api.Client, error) {
 	fmt.Println("Mounting the database backend")
 	if _, err := client.Logical().WriteWithContext(ctx,
 		"sys/mounts/database",
-		map[string]interface{}{
+		map[string]any{
 			"type": "database",
 		}); err != nil {
 		return nil, nil, err
@@ -34,7 +34,7 @@ func SetupVault(ctx context.Context) (net.Listener, *api.Client, error) {
 	fmt.Println("Configuring the postgres database and role")
 	if _, err := client.Logical().WriteWithContext(ctx,
 		fmt.Sprintf("database/config/%s", dbName),
-		map[string]interface{}{
+		map[string]any{
 			"plugin_name":    "postgresql-database-plugin",
 			"allowed_roles":  role,
 			"connection_url": uri,
@@ -46,7 +46,7 @@ func SetupVault(ctx context.Context) (net.Listener, *api.Client, error) {
 
 	if _, err := client.Logical().WriteWithContext(ctx,
 		fmt.Sprintf("database/roles/%s", role),
-		map[string]interface{}{
+		map[string]any{
 			"db_name": dbName,
 			"creation_statements": []string{
 				`CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'`,
@@ -77,10 +77,17 @@ func TearDownRoles(ctx context.Context, client *api.Client) error {
 	}
 
 	if keys, ok := resp.Data["keys"]; ok {
-		leases := keys.([]interface{})
+		leases, ok := keys.([]any)
+		if !ok {
+			leases = make([]any, 0)
+		}
+
 		fmt.Println("") // so there's a line between the ctrl-c character
 		for _, l := range leases {
-			lease := l.(string)
+			lease, ok := l.(string)
+			if !ok {
+				continue
+			}
 			fmt.Printf("Revoking lease %s...\n", lease)
 			leasePath := fmt.Sprintf("%s/%s", fmt.Sprintf(pathTemplate, "revoke", role), lease)
 			if _, err = client.Logical().WriteWithContext(ctx, leasePath, nil); err != nil {

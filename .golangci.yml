@@ -2,7 +2,7 @@ linters:
   disable-all: true
   enable:
     - govet
-    - deadcode
+    - unused
     - vet
     - staticcheck
     - revive
@@ -27,6 +27,9 @@ issues:
       text: "avoid magic numbers"
 
 linters-settings:
+  govet:
+    disable:
+      - fieldalignment
   revive:
     enable-all-rules: true
     rules:

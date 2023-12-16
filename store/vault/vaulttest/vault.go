@@ -4,7 +4,7 @@ import (
 	"net"
 	"testing"
 
-	credKube "github.com/hashicorp/vault-plugin-auth-kubernetes"
+	vaultpluginauthk8s "github.com/hashicorp/vault-plugin-auth-kubernetes"
 	"github.com/hashicorp/vault/api"
 	"github.com/hashicorp/vault/builtin/logical/database"
 	"github.com/hashicorp/vault/http"
@@ -17,7 +17,7 @@ func CreateTestVault(t *testing.T) (net.Listener, *api.Client) {
 
 	coreConf := &vault.CoreConfig{
 		CredentialBackends: map[string]logical.Factory{
-			"kubernetes": credKube.Factory,
+			"kubernetes": vaultpluginauthk8s.Factory,
 		},
 		LogicalBackends: map[string]logical.Factory{
 			"database": database.Factory,

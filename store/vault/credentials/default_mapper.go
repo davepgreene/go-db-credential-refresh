@@ -14,7 +14,7 @@ var (
 
 // DefaultMapper maps the default username/password structure returned from the Vault API.
 func DefaultMapper(s string) (*store.Credential, error) {
-	var v map[string]interface{}
+	var v map[string]any
 	if err := json.Unmarshal([]byte(s), &v); err != nil {
 		return nil, err
 	}
