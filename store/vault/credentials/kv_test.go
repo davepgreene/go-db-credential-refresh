@@ -5,27 +5,45 @@ import (
 	"testing"
 
 	"github.com/davepgreene/go-db-credential-refresh/store/vault/vaulttest"
+	"github.com/hashicorp/vault-client-go"
+	"github.com/hashicorp/vault-client-go/schema"
 )
 
 func TestNewKvCredentials(t *testing.T) {
-	ln, client := vaulttest.CreateTestVault(t)
-	defer ln.Close()
-
 	ctx := context.Background()
 
-	path := "secret/test"
+	client, vaultContainer, err := vaulttest.CreateTestVault(ctx)
+	if err != nil {
+		if vaultContainer != nil {
+			if err := vaultContainer.Terminate(ctx); err != nil {
+				t.Fatal(err)
+			}
+		}
+		t.Fatal(err)
+	}
+	defer func() {
+		if err := vaultContainer.Terminate(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	path := "test"
 	username := "foo"
 	password := "bar"
+	secretMountPath := vault.WithMountPath("secret")
 
-	if _, err := client.Logical().WriteWithContext(ctx, path, map[string]interface{}{
-		"username": username,
-		"password": password,
-	}); err != nil {
+	if _, err = client.Client.Secrets.KvV2Write(ctx, path, schema.KvV2WriteRequest{
+		Data: map[string]any{
+			"username": username,
+			"password": password,
+		}},
+		secretMountPath,
+	); err != nil {
 		t.Fatal(err)
 	}
 
-	kvc := NewKvCredentials(path)
-	credStr, err := kvc.GetCredentials(ctx, client)
+	kvc := NewKvCredentials("secret", path)
+	credStr, err := kvc.GetCredentials(ctx, client.Client)
 	if err != nil {
 		t.Fatal(err)
 	}

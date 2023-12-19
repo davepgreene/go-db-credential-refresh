@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/hashicorp/vault/api"
+	"github.com/hashicorp/vault-client-go"
 )
 
 var (
@@ -13,8 +13,13 @@ var (
 )
 
 // GetFromVaultSecretsAPI is a wrapper over logical reads from a Vault path with marshalling and error handling.
-func GetFromVaultSecretsAPI(ctx context.Context, client *api.Client, path string) (string, error) {
-	resp, err := client.Logical().ReadWithContext(ctx, path)
+func GetFromVaultSecretsAPI(ctx context.Context, client *vault.Client, mountPath string, path string) (string, error) {
+	opts := make([]vault.RequestOption, 0)
+	if mountPath != "" {
+		opts = append(opts, vault.WithMountPath(mountPath))
+	}
+
+	resp, err := client.Read(ctx, path, opts...)
 	if err != nil {
 		return "", err
 	}

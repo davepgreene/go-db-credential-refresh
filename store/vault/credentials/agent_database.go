@@ -2,9 +2,9 @@ package vaultcredentials
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 
-	"github.com/hashicorp/vault/api"
+	"github.com/hashicorp/vault-client-go"
 
 	"github.com/davepgreene/go-db-credential-refresh/store"
 )
@@ -32,8 +32,8 @@ func NewAgentDatabaseCredentials(mapper Mapper, path string) CredentialLocation 
 }
 
 // GetCredentials implements the CredentialLocation interface.
-func (adb *AgentDatabaseCredentials) GetCredentials(_ context.Context, _ *api.Client) (string, error) {
-	creds, err := ioutil.ReadFile(adb.path)
+func (adb *AgentDatabaseCredentials) GetCredentials(_ context.Context, _ *vault.Client) (string, error) {
+	creds, err := os.ReadFile(adb.path)
 	if err != nil {
 		return "", err
 	}

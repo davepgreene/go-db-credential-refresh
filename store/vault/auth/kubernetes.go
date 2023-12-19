@@ -2,9 +2,10 @@ package vaultauth
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 
-	"github.com/hashicorp/vault/api"
+	"github.com/hashicorp/vault-client-go"
+	"github.com/hashicorp/vault-client-go/schema"
 )
 
 const (
@@ -30,15 +31,15 @@ func NewKubernetesAuth(role, path string) *KubernetesAuth {
 }
 
 // GetToken implements the TokenLocation interface.
-func (k *KubernetesAuth) GetToken(ctx context.Context, client *api.Client) (string, error) {
-	token, err := ioutil.ReadFile(k.path)
+func (k *KubernetesAuth) GetToken(ctx context.Context, client *vault.Client) (string, error) {
+	token, err := os.ReadFile(k.path)
 	if err != nil {
 		return "", err
 	}
 
-	secret, err := client.Logical().WriteWithContext(ctx, "auth/kubernetes/login", map[string]any{
-		"jwt":  string(token),
-		"role": k.role,
+	secret, err := client.Auth.KubernetesLogin(ctx, schema.KubernetesLoginRequest{
+		Jwt:  string(token),
+		Role: k.role,
 	})
 	if err != nil {
 		return "", err

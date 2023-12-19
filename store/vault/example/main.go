@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"time"
@@ -23,8 +24,6 @@ const (
 	port     = 5432
 )
 
-// This example assumes a PostgreSQL database running on localhost:5432
-// docker run --name pg -p 5432:5432 -e POSTGRES_PASSWORD=postgres -d postgres
 func main() {
 	err := Run()
 	if err == nil {
@@ -35,22 +34,48 @@ func main() {
 		return
 	}
 
-	fmt.Println(err)
-	os.Exit(1)
+	log.Fatal(err)
 }
 
-func Run() error {
-	var err error
-
+func Run() (err error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	infraCtx := context.Background()
 
-	// Set up Vault, DB backend, and Postgres configuration
-	ln, client, err := SetupVault(ctx)
+	dbContainer, err := setupDb(infraCtx)
 	if err != nil {
 		return err
 	}
-	defer ln.Close()
+
+	defer func() {
+		if cleanupErr := dbContainer.Terminate(infraCtx); cleanupErr != nil {
+			log.Printf("error cleaning up postgres container: %v", cleanupErr)
+			err = cleanupErr
+		}
+	}()
+
+	driverConfig, err := generateDriverConfig(infraCtx, dbContainer)
+	if err != nil {
+		return err
+	}
+
+	// Set up Vault, DB backend, and Postgres configuration
+	client, cleanup, err := setupVault(infraCtx, "host.docker.internal", driverConfig.Port)
+	if err != nil {
+		if cleanup != nil {
+			if err := cleanup(); err != nil {
+				return err
+			}
+		}
+
+		return err
+	}
+	defer func() {
+		if cleanupErr := cleanup(); cleanupErr != nil {
+			log.Printf("error cleaning up vault container: %v", cleanupErr)
+			err = cleanupErr
+		}
+	}()
 
 	// Create the store
 	store, err := vault.NewStore(&vault.Config{
@@ -62,14 +87,7 @@ func Run() error {
 	}
 
 	// Create the connector which implements database/sql/driver.Connector
-	c, err := driver.NewConnector(store, "pgx", &driver.Config{
-		Host: host,
-		Port: port,
-		DB:   dbName,
-		Opts: map[string]string{
-			"sslmode": "disable",
-		},
-	})
+	c, err := driver.NewConnector(store, "pgx", driverConfig)
 	if err != nil {
 		return err
 	}
@@ -90,14 +108,12 @@ func Run() error {
 	go func() {
 		<-appSignal
 		cancel()
-		err = TearDownRoles(ctx, client)
 	}()
 
 	for {
 		// First ping the DB to open a connection
-		err = db.Ping(ctx, database)
-		if err != nil {
-			fmt.Println(err)
+		if err := db.Ping(ctx, database); err != nil {
+			log.Println(err)
 
 			break
 		}
@@ -115,8 +131,10 @@ func Run() error {
 			break
 		}
 
-		fmt.Println(users)
+		fmt.Printf("Retrieving users from database: %v\n", users)
 	}
+
+	// err = TearDownRoles(ctx, client)
 
 	return err
 }

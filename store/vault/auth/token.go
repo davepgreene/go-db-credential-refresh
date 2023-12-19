@@ -4,11 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/hashicorp/vault/api"
-)
-
-const (
-	tokenSelfLookupPath = "auth/token/lookup-self" //nolint:gosec
+	"github.com/hashicorp/vault-client-go"
 )
 
 // TokenAuth is a pass-through authentication mechanism to set vault tokens directly for
@@ -30,10 +26,12 @@ func NewTokenAuth(token string) *TokenAuth {
 }
 
 // GetToken implements the TokenLocation interface.
-func (t *TokenAuth) GetToken(ctx context.Context, client *api.Client) (string, error) {
-	client.SetToken(t.token)
+func (t *TokenAuth) GetToken(ctx context.Context, client *vault.Client) (string, error) {
+	if err := client.SetToken(t.token); err != nil {
+		return "", err
+	}
 	// Before we pass the token back we should call an endpoint it will have access to just to be sure
-	resp, err := client.Logical().ReadWithContext(ctx, tokenSelfLookupPath)
+	resp, err := client.Auth.TokenLookUpSelf(ctx)
 	if err != nil {
 		return "", err
 	}

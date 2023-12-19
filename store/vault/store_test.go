@@ -4,10 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"testing"
 
-	"github.com/hashicorp/vault/api"
+	"github.com/hashicorp/vault-client-go"
 
 	"github.com/davepgreene/go-db-credential-refresh/store"
 	vaultcredentials "github.com/davepgreene/go-db-credential-refresh/store/vault/credentials"
@@ -21,19 +20,19 @@ const (
 )
 
 type testTokenLocation struct {
-	TokenGetter func(ctx context.Context, c *api.Client) (string, error)
+	TokenGetter func(ctx context.Context, c *vault.Client) (string, error)
 }
 
-func (k *testTokenLocation) GetToken(ctx context.Context, client *api.Client) (string, error) {
+func (k *testTokenLocation) GetToken(ctx context.Context, client *vault.Client) (string, error) {
 	return k.TokenGetter(ctx, client)
 }
 
 type testCredentialLocation struct {
-	CredentialGetter func(ctx context.Context, c *api.Client) (string, error)
+	CredentialGetter func(ctx context.Context, c *vault.Client) (string, error)
 	Mapper           func(s string) (*store.Credential, error)
 }
 
-func (tcl *testCredentialLocation) GetCredentials(ctx context.Context, client *api.Client) (string, error) {
+func (tcl *testCredentialLocation) GetCredentials(ctx context.Context, client *vault.Client) (string, error) {
 	return tcl.CredentialGetter(ctx, client)
 }
 
@@ -50,9 +49,7 @@ func TestNewStoreCannotCreateWithoutValidConfig(t *testing.T) {
 		t.Fatal("expected an error but didn't get one")
 	}
 
-	client, err := api.NewClient(&api.Config{
-		Address: "localhost:8200",
-	})
+	client, err := vault.New()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,7 +77,7 @@ func TestNewStoreCannotCreateWithoutValidConfig(t *testing.T) {
 	if _, err := NewStore(&Config{
 		Client: client,
 		TokenLocation: &testTokenLocation{
-			TokenGetter: func(_ context.Context, _ *api.Client) (string, error) {
+			TokenGetter: func(_ context.Context, _ *vault.Client) (string, error) {
 				return "", errors.New("unable to get token")
 			},
 		},
@@ -91,9 +88,7 @@ func TestNewStoreCannotCreateWithoutValidConfig(t *testing.T) {
 }
 
 func TestNewStoreWithValidConfig(t *testing.T) {
-	client, err := api.NewClient(&api.Config{
-		Address: "localhost:8200",
-	})
+	client, err := vault.New()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,12 +96,12 @@ func TestNewStoreWithValidConfig(t *testing.T) {
 	s, err := NewStore(&Config{
 		Client: client,
 		TokenLocation: &testTokenLocation{
-			TokenGetter: func(_ context.Context, _ *api.Client) (string, error) {
+			TokenGetter: func(_ context.Context, _ *vault.Client) (string, error) {
 				return token, nil
 			},
 		},
 		CredentialLocation: &testCredentialLocation{
-			CredentialGetter: func(_ context.Context, _ *api.Client) (string, error) {
+			CredentialGetter: func(_ context.Context, _ *vault.Client) (string, error) {
 				return fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password), nil
 			},
 			Mapper: vaultcredentials.DefaultMapper,
@@ -133,9 +128,7 @@ func TestNewStoreWithValidConfig(t *testing.T) {
 }
 
 func TestNewStoreWithGetCredentialError(t *testing.T) {
-	client, err := api.NewClient(&api.Config{
-		Address: "localhost:8200",
-	})
+	client, err := vault.New()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -143,12 +136,12 @@ func TestNewStoreWithGetCredentialError(t *testing.T) {
 	s, err := NewStore(&Config{
 		Client: client,
 		TokenLocation: &testTokenLocation{
-			TokenGetter: func(_ context.Context, _ *api.Client) (string, error) {
+			TokenGetter: func(_ context.Context, _ *vault.Client) (string, error) {
 				return token, nil
 			},
 		},
 		CredentialLocation: &testCredentialLocation{
-			CredentialGetter: func(_ context.Context, _ *api.Client) (string, error) {
+			CredentialGetter: func(_ context.Context, _ *vault.Client) (string, error) {
 				return "", errors.New("could not get credentials")
 			},
 			Mapper: func(s string) (*store.Credential, error) {
@@ -171,9 +164,7 @@ func TestNewStoreWithGetCredentialError(t *testing.T) {
 }
 
 func TestNewStoreWithCredentialMapperError(t *testing.T) {
-	client, err := api.NewClient(&api.Config{
-		Address: "localhost:8200",
-	})
+	client, err := vault.New()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -181,12 +172,12 @@ func TestNewStoreWithCredentialMapperError(t *testing.T) {
 	s, err := NewStore(&Config{
 		Client: client,
 		TokenLocation: &testTokenLocation{
-			TokenGetter: func(_ context.Context, _ *api.Client) (string, error) {
+			TokenGetter: func(_ context.Context, _ *vault.Client) (string, error) {
 				return token, nil
 			},
 		},
 		CredentialLocation: &testCredentialLocation{
-			CredentialGetter: func(_ context.Context, _ *api.Client) (string, error) {
+			CredentialGetter: func(_ context.Context, _ *vault.Client) (string, error) {
 				return fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password), nil
 			},
 			Mapper: func(s string) (*store.Credential, error) {
@@ -206,15 +197,38 @@ func TestNewStoreWithCredentialMapperError(t *testing.T) {
 }
 
 func TestNewStoreWithClientThatAlreadyHasToken(t *testing.T) {
-	ln, client := vaulttest.CreateTestVault(t)
-	defer ln.Close()
+	ctx := context.Background()
+
+	client, vaultContainer, err := vaulttest.CreateTestVault(ctx)
+	if err != nil {
+		if vaultContainer != nil {
+			if err := vaultContainer.Terminate(ctx); err != nil {
+				t.Fatal(err)
+			}
+		}
+		t.Fatal(err)
+	}
+	defer func() {
+		if err := vaultContainer.Terminate(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}()
 
 	s, err := NewStore(&Config{
-		Client: client,
+		Client: client.Client,
 		CredentialLocation: &testCredentialLocation{
-			CredentialGetter: func(_ context.Context, c *api.Client) (string, error) {
-				if c.Token() != client.Token() {
-					t.Fatalf("expected token to be '%s' but got '%s' instead", client.Token(), c.Token())
+			CredentialGetter: func(ctx context.Context, c *vault.Client) (string, error) {
+				resp, err := c.Auth.TokenLookUpSelf(ctx)
+				if err != nil {
+					return "", err
+				}
+				token, ok := resp.Data["id"].(string)
+				if !ok {
+					return "", errors.New("vault response does not container token id")
+				}
+
+				if token != client.Token {
+					t.Fatalf("expected token to be '%s' but got '%s' instead", client.Token, token)
 				}
 
 				return fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password), nil
@@ -225,8 +239,6 @@ func TestNewStoreWithClientThatAlreadyHasToken(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	ctx := context.Background()
 
 	creds, err := s.Get(ctx)
 	if err != nil {
@@ -243,24 +255,21 @@ func TestNewStoreWithClientThatAlreadyHasToken(t *testing.T) {
 }
 
 func TestNewStoreWithInvalidTokenLocation(t *testing.T) {
-	envToken := os.Getenv(api.EnvVaultToken)
-	client, err := api.NewClient(&api.Config{
-		Address: "localhost:8200",
-	})
+	client, err := vault.New()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// If the client has pulled a token from the environment we deliberately unset it to mimic
 	// a scenario where there's no token present in any way.
-	if client.Token() == envToken {
-		client.SetToken("")
+	if err := client.SetToken(""); err != nil {
+		t.Fatal(err)
 	}
 
 	if _, err := NewStore(&Config{
 		Client: client,
 		CredentialLocation: &testCredentialLocation{
-			CredentialGetter: func(_ context.Context, _ *api.Client) (string, error) {
+			CredentialGetter: func(_ context.Context, _ *vault.Client) (string, error) {
 				return "", nil
 			},
 			Mapper: func(s string) (*store.Credential, error) {
@@ -273,15 +282,29 @@ func TestNewStoreWithInvalidTokenLocation(t *testing.T) {
 }
 
 func TestStoreWithCachedCredentials(t *testing.T) {
-	ln, client := vaulttest.CreateTestVault(t)
-	defer ln.Close()
+	ctx := context.Background()
+
+	client, vaultContainer, err := vaulttest.CreateTestVault(ctx)
+	if err != nil {
+		if vaultContainer != nil {
+			if err := vaultContainer.Terminate(ctx); err != nil {
+				t.Fatal(err)
+			}
+		}
+		t.Fatal(err)
+	}
+	defer func() {
+		if err := vaultContainer.Terminate(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}()
 
 	mapCallCount := 0
 
 	s, err := NewStore(&Config{
-		Client: client,
+		Client: client.Client,
 		CredentialLocation: &testCredentialLocation{
-			CredentialGetter: func(_ context.Context, _ *api.Client) (string, error) {
+			CredentialGetter: func(_ context.Context, _ *vault.Client) (string, error) {
 				return fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password), nil
 			},
 			Mapper: func(s string) (*store.Credential, error) {
@@ -294,8 +317,6 @@ func TestStoreWithCachedCredentials(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	ctx := context.Background()
 
 	creds, err := s.Get(ctx)
 	if err != nil {

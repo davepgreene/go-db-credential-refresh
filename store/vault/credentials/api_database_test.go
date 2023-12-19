@@ -6,28 +6,42 @@ import (
 	"testing"
 
 	"github.com/davepgreene/go-db-credential-refresh/store/vault/vaulttest"
+	"github.com/hashicorp/vault-client-go/schema"
 )
 
 func TestNewAPIDatabaseCredentials(t *testing.T) {
-	ln, client := vaulttest.CreateTestVault(t)
-	defer ln.Close()
-
 	ctx := context.Background()
+
+	client, vaultContainer, err := vaulttest.CreateTestVault(ctx)
+	if err != nil {
+		if vaultContainer != nil {
+			if err := vaultContainer.Terminate(ctx); err != nil {
+				t.Fatal(err)
+			}
+		}
+		t.Fatal(err)
+	}
+	defer func() {
+		if err := vaultContainer.Terminate(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}()
 
 	// Because this CredentialLocation is agnostic to the location of the actual credentials we can
 	// fudge this test by using the k/v secret type rather than building a mock vault plugin,
 	// mounting it as a db type, and dealing with vault's complicated "separate binary with gRPC
 	// communication" process.
 	// Instead we mount the k/v secret type at `database`.
-	if _, err := client.Logical().WriteWithContext(ctx, "sys/mounts/database", map[string]interface{}{
-		"type": "kv",
+	if _, err := client.Client.System.MountsEnableSecretsEngine(ctx, "database", schema.MountsEnableSecretsEngineRequest{
+		Type:          "kv",
+		PluginVersion: "2",
 	}); err != nil {
 		t.Fatal(err)
 	}
 
 	role := "postgres"
 
-	if _, err := client.Logical().WriteWithContext(ctx, fmt.Sprintf("database/creds/%s", role), map[string]interface{}{
+	if _, err := client.Client.Write(ctx, fmt.Sprintf("database/creds/%s", role), map[string]interface{}{
 		"username": username,
 		"password": password,
 	}); err != nil {
@@ -35,7 +49,7 @@ func TestNewAPIDatabaseCredentials(t *testing.T) {
 	}
 
 	adc := NewAPIDatabaseCredentials(role, "")
-	credStr, err := adc.GetCredentials(ctx, client)
+	credStr, err := adc.GetCredentials(ctx, client.Client)
 	if err != nil {
 		t.Fatal(err)
 	}

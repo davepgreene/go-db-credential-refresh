@@ -7,16 +7,30 @@ import (
 	"testing"
 
 	"github.com/davepgreene/go-db-credential-refresh/store/vault/vaulttest"
+	"github.com/hashicorp/vault-client-go"
+	"github.com/hashicorp/vault-client-go/schema"
 )
 
 func TestGetFromVaultSecretsAPI(t *testing.T) {
-	ln, client := vaulttest.CreateTestVault(t)
-	defer ln.Close()
-
 	ctx := context.Background()
 
+	client, vaultContainer, err := vaulttest.CreateTestVault(ctx)
+	if err != nil {
+		if vaultContainer != nil {
+			if err := vaultContainer.Terminate(ctx); err != nil {
+				t.Fatal(err)
+			}
+		}
+		t.Fatal(err)
+	}
+	defer func() {
+		if err := vaultContainer.Terminate(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}()
+
 	// Valid path with response
-	b, err := GetFromVaultSecretsAPI(ctx, client, "auth/token/lookup-self")
+	b, err := GetFromVaultSecretsAPI(ctx, client.Client, "", "auth/token/lookup-self")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,29 +55,44 @@ func TestGetFromVaultSecretsAPI(t *testing.T) {
 	}
 
 	// Invalid path
-	_, err = GetFromVaultSecretsAPI(ctx, client, "flerp/derp/herp")
+	_, err = GetFromVaultSecretsAPI(ctx, client.Client, "", "flerp/derp/herp")
 	if err == nil {
 		t.Fatal("expected an error but didn't get one")
 	}
 
-	if !errors.Is(err, errInvalidPath) {
-		t.Fatalf("expected a '%T' but got '%T' instead", errInvalidPath, err)
+	var respErr *vault.ResponseError
+	if !errors.As(err, &respErr) {
+		t.Fatalf("expected a '%T' but got '%T' instead", respErr, err)
 	}
 }
 
 func TestGetFromVaultSecretsAPIWithVaultError(t *testing.T) {
-	ln, client := vaulttest.CreateTestVault(t)
-	defer ln.Close()
-
 	ctx := context.Background()
 
-	if _, err := client.Logical().WriteWithContext(ctx, "secret/foo", map[string]interface{}{
-		"secret": "string",
-	}); err != nil {
+	client, vaultContainer, err := vaulttest.CreateTestVault(ctx)
+	if err != nil {
+		if vaultContainer != nil {
+			if err := vaultContainer.Terminate(ctx); err != nil {
+				t.Fatal(err)
+			}
+		}
+		t.Fatal(err)
+	}
+	defer func() {
+		if err := vaultContainer.Terminate(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	if _, err := client.Client.Secrets.KvV2Write(ctx, "foo", schema.KvV2WriteRequest{
+		Data: map[string]interface{}{
+			"secret": "string",
+		},
+	}, vault.WithMountPath("secret")); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := client.Logical().WriteWithContext(ctx, "sys/policy/restricted", map[string]interface{}{
+	if _, err := client.Client.Write(ctx, "sys/policy/restricted", map[string]interface{}{
 		"policy": `path "secret/foo" {
 			capabilities = ["deny"]
 		}`,
@@ -71,16 +100,18 @@ func TestGetFromVaultSecretsAPIWithVaultError(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	resp, err := client.Logical().WriteWithContext(ctx, "auth/token/create", map[string]interface{}{
-		"policies": []string{"restricted"},
+	resp, err := client.Client.Auth.TokenCreate(ctx, schema.TokenCreateRequest{
+		Policies: []string{"restricted"},
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	client.SetToken(resp.Auth.ClientToken)
+	if err := client.Client.SetToken(resp.Auth.ClientToken); err != nil {
+		t.Fatal(err)
+	}
 
-	if resp, err := GetFromVaultSecretsAPI(ctx, client, "secret/foo"); err == nil {
+	if resp, err := GetFromVaultSecretsAPI(ctx, client.Client, "secret", "foo"); err == nil {
 		t.Fatalf("expected an error but got '%s' as a response instead", resp)
 	}
 }

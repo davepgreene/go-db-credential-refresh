@@ -3,8 +3,9 @@ package vault
 import (
 	"context"
 	"errors"
+	"net/http"
 
-	"github.com/hashicorp/vault/api"
+	"github.com/hashicorp/vault-client-go"
 
 	"github.com/davepgreene/go-db-credential-refresh/driver"
 	vaultauth "github.com/davepgreene/go-db-credential-refresh/store/vault/auth"
@@ -13,12 +14,12 @@ import (
 
 // TokenLocation is an interface describing how to get a Vault token
 type TokenLocation interface {
-	GetToken(ctx context.Context, client *api.Client) (string, error)
+	GetToken(ctx context.Context, client *vault.Client) (string, error)
 }
 
 // Store is a Store implementation for HashiCorp Vault.
 type Store struct {
-	client *api.Client
+	client *vault.Client
 	cl     vaultcredentials.CredentialLocation
 	tl     TokenLocation
 	creds  driver.Credentials
@@ -26,7 +27,7 @@ type Store struct {
 
 // Config contains configuration information.
 type Config struct {
-	Client             *api.Client
+	Client             *vault.Client
 	TokenLocation      TokenLocation
 	CredentialLocation vaultcredentials.CredentialLocation
 }
@@ -53,21 +54,39 @@ func NewStore(c *Config) (*Store, error) {
 		return nil, ErrClientRequired
 	}
 
+	ctx := context.Background()
+
 	if c.TokenLocation == nil {
-		// If the token location is nil, we should check if the client already has a token
-		if client.Token() == "" {
+		// If the token location is nil, we should check if the client already
+		// has a token by doing a self-lookup
+		resp, err := client.Auth.TokenLookUpSelf(ctx)
+		if err != nil {
+			var rErr *vault.ResponseError
+			if errors.As(err, &rErr) {
+				if rErr.StatusCode == http.StatusForbidden {
+					return nil, ErrTokenLocationRequired
+				}
+			}
+
+			return nil, err
+		}
+
+		token, ok := resp.Data["id"]
+		if !ok {
 			return nil, ErrTokenLocationRequired
 		}
 
-		c.TokenLocation = vaultauth.NewTokenAuth(client.Token())
+		c.TokenLocation = vaultauth.NewTokenAuth(token.(string))
 	}
 
-	token, err := c.TokenLocation.GetToken(context.TODO(), client)
+	token, err := c.TokenLocation.GetToken(ctx, client)
 	if err != nil {
 		return nil, err
 	}
 
-	client.SetToken(token)
+	if err := client.SetToken(token); err != nil {
+		return nil, err
+	}
 
 	return &Store{
 		client: client,

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/vault/api"
+	"github.com/hashicorp/vault-client-go"
 
 	"github.com/davepgreene/go-db-credential-refresh/store"
 )
@@ -32,8 +32,8 @@ func NewAPIDatabaseCredentials(role, path string) CredentialLocation {
 }
 
 // GetCredentials implements the CredentialLocation interface.
-func (db *APIDatabaseCredentials) GetCredentials(ctx context.Context, client *api.Client) (string, error) {
-	return GetFromVaultSecretsAPI(ctx, client, fmt.Sprintf("%s/creds/%s", db.path, db.role))
+func (db *APIDatabaseCredentials) GetCredentials(ctx context.Context, client *vault.Client) (string, error) {
+	return GetFromVaultSecretsAPI(ctx, client, "", fmt.Sprintf("%s/creds/%s", db.path, db.role))
 }
 
 // Map implements the CredentialLocation interface.

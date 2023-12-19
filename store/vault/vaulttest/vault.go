@@ -1,47 +1,68 @@
 package vaulttest
 
 import (
-	"net"
-	"testing"
+	"context"
+	"math/rand"
+	"time"
 
-	vaultpluginauthk8s "github.com/hashicorp/vault-plugin-auth-kubernetes"
-	"github.com/hashicorp/vault/api"
-	"github.com/hashicorp/vault/builtin/logical/database"
-	"github.com/hashicorp/vault/http"
-	"github.com/hashicorp/vault/sdk/logical"
-	"github.com/hashicorp/vault/vault"
+	vaultclient "github.com/hashicorp/vault-client-go"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/vault"
 )
 
-func CreateTestVault(t *testing.T) (net.Listener, *api.Client) {
-	t.Helper()
+const (
+	tokenLength = 52
+)
 
-	coreConf := &vault.CoreConfig{
-		CredentialBackends: map[string]logical.Factory{
-			"kubernetes": vaultpluginauthk8s.Factory,
-		},
-		LogicalBackends: map[string]logical.Factory{
-			"database": database.Factory,
-		},
+type TokenCarryingClient struct {
+	Client *vaultclient.Client
+	Token  string
+}
+
+func CreateTestVault(ctx context.Context) (*TokenCarryingClient, *vault.VaultContainer, error) {
+	rootToken := RandString(tokenLength)
+
+	vaultContainer, err := vault.RunContainer(ctx, vault.WithToken(rootToken), vault.WithInitCommand(
+		"auth enable kubernetes", // Enable the kubernetes auth method
+	),
+		testcontainers.WithImage("hashicorp/vault:1.15.4"),
+	)
+	if err != nil {
+		return nil, nil, err
 	}
 
-	core, keyShares, rootToken := vault.TestCoreUnsealedWithConfig(t, coreConf)
-
-	_ = keyShares
-
-	// Start an HTTP server for the core.
-	ln, addr := http.TestServer(t, core)
+	hostAddress, err := vaultContainer.HttpHostAddress(ctx)
+	if err != nil {
+		return nil, vaultContainer, err
+	}
 
 	// Create a client that talks to the server, initially authenticating with
 	// the root token.
-	conf := api.DefaultConfig()
-	conf.Address = addr
-
-	client, err := api.NewClient(conf)
+	client, err := vaultclient.New(
+		vaultclient.WithAddress(hostAddress),
+		vaultclient.WithRequestTimeout(30*time.Second),
+	)
 	if err != nil {
-		t.Fatal(err)
+		return nil, vaultContainer, err
 	}
 
-	client.SetToken(rootToken)
+	if err := client.SetToken(rootToken); err != nil {
+		return nil, vaultContainer, err
+	}
 
-	return ln, client
+	return &TokenCarryingClient{
+		Client: client,
+		Token:  rootToken,
+	}, vaultContainer, nil
+}
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+func RandString(n int) string {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))] //nolint:gosec
+	}
+
+	return string(b)
 }
