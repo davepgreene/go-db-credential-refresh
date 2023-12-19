@@ -21,6 +21,13 @@ jobs:
             name: "store/awsrds"
           - dir: "./store/vault"
             name: "store/vault"
+        exclude:
+          - dir: "./store/vault"
+            go: "1.18.x"
+          - dir: "./store/vault"
+            go: "1.19.x"
+          - dir: "./store/vault"
+            go: "1.20.x"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
