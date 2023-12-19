@@ -102,7 +102,7 @@ func TestNewConnectorFailsWithNilConfig(t *testing.T) {
 			AuthError: errorTester(MysqlErrorText),
 		}
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	getFn := func(ctx context.Context) (Credentials, error) {
@@ -113,7 +113,7 @@ func TestNewConnectorFailsWithNilConfig(t *testing.T) {
 		Getter:    getFn,
 		Refresher: getFn,
 	}, "driver", nil); err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 }
 
@@ -132,7 +132,7 @@ func TestNewConnectorWithInvalidDriver(t *testing.T) {
 		DB:   "",
 		Opts: nil,
 	}); err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 }
 
@@ -145,7 +145,7 @@ func TestConnectorErrorsIfStoreGetFailsReturnsNilOrIsInvalid(t *testing.T) {
 			AuthError: errorTester(MysqlErrorText),
 		}
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	cfg := &Config{
@@ -206,13 +206,13 @@ func TestConnectorErrorsIfStoreGetFailsReturnsNilOrIsInvalid(t *testing.T) {
 				Refresher: testCase.getFn,
 			}, "driver", cfg)
 			if err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 
 			ctx := context.Background()
 
 			if _, err = c.Connect(ctx); err == nil {
-				t.Error("expected error but got nil")
+				t.Fatal("expected error but got nil")
 			}
 		})
 	}
@@ -228,7 +228,7 @@ func TestConnectorCanUseAlternateFormatter(t *testing.T) {
 			AuthError: errorTester(MysqlErrorText),
 		}
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	db := "test"
@@ -251,16 +251,16 @@ func TestConnectorCanUseAlternateFormatter(t *testing.T) {
 		Formatter: PgKVFormatter,
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if _, err := c.Connect(ctx); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	dsn := PgKVFormatter(username, password, host, port, db, nil)
 	if d.ConnStr != dsn {
-		t.Errorf("expected %s but got %s instead", dsn, d.ConnStr)
+		t.Fatalf("expected %s but got %s instead", dsn, d.ConnStr)
 	}
 }
 
@@ -274,7 +274,7 @@ func TestConnectorRefreshesCredentialsCorrectly(t *testing.T) {
 			AuthError: errorTester(MysqlErrorText),
 		}
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	getFn := func(ctx context.Context) (Credentials, error) {
@@ -293,17 +293,17 @@ func TestConnectorRefreshesCredentialsCorrectly(t *testing.T) {
 		DB:   "test",
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	ctx := context.Background()
 
 	if _, err := c.Connect(ctx); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if d.Called != 1 {
-		t.Errorf("expected driver.Open to only have been called once but it was called %d times", d.Called)
+		t.Fatalf("expected driver.Open to only have been called once but it was called %d times", d.Called)
 	}
 }
 
@@ -319,7 +319,7 @@ func TestConnectorFailsToConnectThenReconnects(t *testing.T) {
 			AuthError: errorTester(MysqlErrorText),
 		}
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	getFn := func(ctx context.Context) (Credentials, error) {
@@ -339,17 +339,17 @@ func TestConnectorFailsToConnectThenReconnects(t *testing.T) {
 		Opts: nil,
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	ctx := context.Background()
 
 	if _, err := c.Connect(ctx); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if d.Called != 2 {
-		t.Errorf("expected driver.Open to only have been called twice but it was called %d times", d.Called)
+		t.Fatalf("expected driver.Open to only have been called twice but it was called %d times", d.Called)
 	}
 }
 
@@ -365,7 +365,7 @@ func TestConnectorFailsToRefreshOnConnectionFailure(t *testing.T) {
 			AuthError: errorTester(MysqlErrorText),
 		}
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	cfg := Config{
@@ -391,21 +391,21 @@ func TestConnectorFailsToRefreshOnConnectionFailure(t *testing.T) {
 		},
 	}, "driver", &cfg)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	ctx := context.Background()
 
 	if _, err := c.Connect(ctx); err == nil {
-		t.Error("expected an error but got nil")
+		t.Fatal("expected an error but got nil")
 	}
 
 	if d.Called != 1 {
-		t.Errorf("expected driver.Open to only have been called once but it was called %d times", d.Called)
+		t.Fatalf("expected driver.Open to only have been called once but it was called %d times", d.Called)
 	}
 
 	if refreshCalled != 1 {
-		t.Errorf("expected Refresh func to have been called once but it was called %d times", refreshCalled)
+		t.Fatalf("expected Refresh func to have been called once but it was called %d times", refreshCalled)
 	}
 }
 
@@ -424,7 +424,7 @@ func TestConnectorRetriesUntilSuccess(t *testing.T) {
 			AuthError: errorTester(MysqlErrorText),
 		}
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	cfg := Config{
@@ -457,22 +457,22 @@ func TestConnectorRetriesUntilSuccess(t *testing.T) {
 		},
 	}, "driver", &cfg)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	ctx := context.Background()
 
 	if _, err := c.Connect(ctx); err != nil {
-		t.Error("expected an error but got nil")
+		t.Fatal("expected an error but got nil")
 	}
 
 	expectedOpenCalls := cfg.Retries + 1
 	if d.Called != expectedOpenCalls {
-		t.Errorf("expected driver.Open to only have been called %d time but it was called %d times", expectedOpenCalls, d.Called)
+		t.Fatalf("expected driver.Open to only have been called %d time but it was called %d times", expectedOpenCalls, d.Called)
 	}
 
 	if refreshCalled != int(cfg.Retries) {
-		t.Errorf("expected Refresh func to have been called %d time but it was called %d times", cfg.Retries, refreshCalled)
+		t.Fatalf("expected Refresh func to have been called %d time but it was called %d times", cfg.Retries, refreshCalled)
 	}
 }
 
@@ -496,7 +496,7 @@ func TestConnectorRetriesUntilMax(t *testing.T) {
 			AuthError: errorTester(MysqlErrorText),
 		}
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	cfg := Config{
@@ -526,22 +526,22 @@ func TestConnectorRetriesUntilMax(t *testing.T) {
 		},
 	}, "driver", &cfg)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	ctx := context.Background()
 
 	if _, err := c.Connect(ctx); err == nil {
-		t.Error("expected an error but got nil")
+		t.Fatal("expected an error but got nil")
 	}
 
 	expectedOpenCalls := cfg.Retries + 1
 	if d.Called != expectedOpenCalls {
-		t.Errorf("expected driver.Open to only have been called %d time but it was called %d times", expectedOpenCalls, d.Called)
+		t.Fatalf("expected driver.Open to only have been called %d time but it was called %d times", expectedOpenCalls, d.Called)
 	}
 
 	if refreshCalled != cfg.Retries {
-		t.Errorf("expected Refresh func to have been called %d time but it was called %d times", cfg.Retries, refreshCalled)
+		t.Fatalf("expected Refresh func to have been called %d time but it was called %d times", cfg.Retries, refreshCalled)
 	}
 }
 
@@ -566,7 +566,7 @@ func TestConnectorRetriesUntilNonAuthError(t *testing.T) {
 			AuthError: errorTester(MysqlErrorText),
 		}
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	cfg := Config{
@@ -596,21 +596,21 @@ func TestConnectorRetriesUntilNonAuthError(t *testing.T) {
 		},
 	}, "driver", &cfg)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	ctx := context.Background()
 
 	if _, err := c.Connect(ctx); err == nil {
-		t.Error("expected an error but got nil")
+		t.Fatal("expected an error but got nil")
 	}
 
 	if d.Called != cfg.Retries {
-		t.Errorf("expected driver.Open to only have been called %d time but it was called %d times", cfg.Retries, d.Called)
+		t.Fatalf("expected driver.Open to only have been called %d time but it was called %d times", cfg.Retries, d.Called)
 	}
 
 	if refreshCalled != cfg.Retries-1 {
-		t.Errorf("expected Refresh func to have been called %d time but it was called %d times", cfg.Retries-1, refreshCalled)
+		t.Fatalf("expected Refresh func to have been called %d time but it was called %d times", cfg.Retries-1, refreshCalled)
 	}
 }
 
@@ -626,7 +626,7 @@ func TestConnectorErrorsIfUnknownDBErrorMessage(t *testing.T) {
 			AuthError: errorTester(MysqlErrorText),
 		}
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	cfg := Config{
@@ -648,16 +648,16 @@ func TestConnectorErrorsIfUnknownDBErrorMessage(t *testing.T) {
 		Refresher: getFn,
 	}, "driver", &cfg)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	ctx := context.Background()
 
 	if _, err := c.Connect(ctx); err == nil {
-		t.Error("expected error but got nil")
+		t.Fatal("expected error but got nil")
 	}
 
 	if d.Called != 1 {
-		t.Errorf("expected driver.Open to only have been called once but it was called %d times", d.Called)
+		t.Fatalf("expected driver.Open to only have been called once but it was called %d times", d.Called)
 	}
 }

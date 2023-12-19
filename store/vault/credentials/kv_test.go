@@ -21,25 +21,25 @@ func TestNewKvCredentials(t *testing.T) {
 		"username": username,
 		"password": password,
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	kvc := NewKvCredentials(path)
 	credStr, err := kvc.GetCredentials(ctx, client)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	creds, err := kvc.Map(credStr)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if creds.GetUsername() != username {
-		t.Errorf("expected username to be %s but got %s", username, creds.GetUsername())
+		t.Fatalf("expected username to be %s but got %s", username, creds.GetUsername())
 	}
 
 	if creds.GetPassword() != password {
-		t.Errorf("expected password to be %s but got %s instead", password, creds.GetPassword())
+		t.Fatalf("expected password to be %s but got %s instead", password, creds.GetPassword())
 	}
 }

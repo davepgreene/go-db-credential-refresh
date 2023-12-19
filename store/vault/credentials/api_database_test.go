@@ -22,7 +22,7 @@ func TestNewAPIDatabaseCredentials(t *testing.T) {
 	if _, err := client.Logical().WriteWithContext(ctx, "sys/mounts/database", map[string]interface{}{
 		"type": "kv",
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	role := "postgres"
@@ -31,25 +31,25 @@ func TestNewAPIDatabaseCredentials(t *testing.T) {
 		"username": username,
 		"password": password,
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	adc := NewAPIDatabaseCredentials(role, "")
 	credStr, err := adc.GetCredentials(ctx, client)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	creds, err := adc.Map(credStr)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if creds.GetUsername() != username {
-		t.Errorf("expected username to be %s but got %s", username, creds.GetUsername())
+		t.Fatalf("expected username to be %s but got %s", username, creds.GetUsername())
 	}
 
 	if creds.GetPassword() != password {
-		t.Errorf("expected password to be %s but got %s instead", password, creds.GetPassword())
+		t.Fatalf("expected password to be %s but got %s instead", password, creds.GetPassword())
 	}
 }

@@ -43,38 +43,38 @@ func (tcl *testCredentialLocation) Map(s string) (*store.Credential, error) {
 
 func TestNewStoreCannotCreateWithoutValidConfig(t *testing.T) {
 	if _, err := NewStore(nil); err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 
 	if _, err := NewStore(&Config{}); err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 
 	client, err := api.NewClient(&api.Config{
 		Address: "localhost:8200",
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if _, err := NewStore(&Config{
 		Client: client,
 	}); err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 
 	if _, err := NewStore(&Config{
 		Client:        client,
 		TokenLocation: &testTokenLocation{},
 	}); err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 
 	if _, err := NewStore(&Config{
 		TokenLocation:      &testTokenLocation{},
 		CredentialLocation: &testCredentialLocation{},
 	}); err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 
 	if _, err := NewStore(&Config{
@@ -86,7 +86,7 @@ func TestNewStoreCannotCreateWithoutValidConfig(t *testing.T) {
 		},
 		CredentialLocation: &testCredentialLocation{},
 	}); err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 }
 
@@ -95,7 +95,7 @@ func TestNewStoreWithValidConfig(t *testing.T) {
 		Address: "localhost:8200",
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	s, err := NewStore(&Config{
@@ -113,22 +113,22 @@ func TestNewStoreWithValidConfig(t *testing.T) {
 		},
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	ctx := context.Background()
 
 	creds, err := s.Get(ctx)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if creds.GetUsername() != username {
-		t.Errorf("expected username to be '%s' but got '%s' instead", username, creds.GetUsername())
+		t.Fatalf("expected username to be '%s' but got '%s' instead", username, creds.GetUsername())
 	}
 
 	if creds.GetPassword() != password {
-		t.Errorf("expected password to be '%s' but got '%s' instead", password, creds.GetPassword())
+		t.Fatalf("expected password to be '%s' but got '%s' instead", password, creds.GetPassword())
 	}
 }
 
@@ -137,7 +137,7 @@ func TestNewStoreWithGetCredentialError(t *testing.T) {
 		Address: "localhost:8200",
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	s, err := NewStore(&Config{
@@ -157,16 +157,16 @@ func TestNewStoreWithGetCredentialError(t *testing.T) {
 		},
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	ctx := context.Background()
 
 	if _, err := s.Get(ctx); err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 }
 
@@ -175,7 +175,7 @@ func TestNewStoreWithCredentialMapperError(t *testing.T) {
 		Address: "localhost:8200",
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	s, err := NewStore(&Config{
@@ -195,13 +195,13 @@ func TestNewStoreWithCredentialMapperError(t *testing.T) {
 		},
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	ctx := context.Background()
 
 	if _, err := s.Get(ctx); err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 }
 
@@ -223,22 +223,22 @@ func TestNewStoreWithClientThatAlreadyHasToken(t *testing.T) {
 		},
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	ctx := context.Background()
 
 	creds, err := s.Get(ctx)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if creds.GetUsername() != username {
-		t.Errorf("expected username to be '%s' but got '%s' instead", username, creds.GetUsername())
+		t.Fatalf("expected username to be '%s' but got '%s' instead", username, creds.GetUsername())
 	}
 
 	if creds.GetPassword() != password {
-		t.Errorf("expected password to be '%s' but got '%s' instead", password, creds.GetPassword())
+		t.Fatalf("expected password to be '%s' but got '%s' instead", password, creds.GetPassword())
 	}
 }
 
@@ -248,7 +248,7 @@ func TestNewStoreWithInvalidTokenLocation(t *testing.T) {
 		Address: "localhost:8200",
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	// If the client has pulled a token from the environment we deliberately unset it to mimic
@@ -268,7 +268,7 @@ func TestNewStoreWithInvalidTokenLocation(t *testing.T) {
 			},
 		},
 	}); err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 }
 
@@ -292,29 +292,29 @@ func TestStoreWithCachedCredentials(t *testing.T) {
 		},
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	ctx := context.Background()
 
 	creds, err := s.Get(ctx)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if creds.GetUsername() != username {
-		t.Errorf("expected username to be '%s' but got '%s' instead", username, creds.GetUsername())
+		t.Fatalf("expected username to be '%s' but got '%s' instead", username, creds.GetUsername())
 	}
 
 	if creds.GetPassword() != password {
-		t.Errorf("expected password to be '%s' but got '%s' instead", password, creds.GetPassword())
+		t.Fatalf("expected password to be '%s' but got '%s' instead", password, creds.GetPassword())
 	}
 
 	if _, err = s.Get(ctx); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if mapCallCount != 1 {
-		t.Errorf("expected the mapper function to only be called once but it was called %d times", mapCallCount)
+		t.Fatalf("expected the mapper function to only be called once but it was called %d times", mapCallCount)
 	}
 }

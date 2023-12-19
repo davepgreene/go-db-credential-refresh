@@ -98,7 +98,7 @@ func TestFormatters(t *testing.T) {
 			if testCase.opts != nil {
 				u, err := url.Parse(dsn)
 				if err != nil {
-					t.Error(err)
+					t.Fatal(err)
 				}
 
 				params := make(map[string]string)
@@ -107,14 +107,14 @@ func TestFormatters(t *testing.T) {
 				}
 
 				if diff := deep.Equal(params, testCase.opts); diff != nil {
-					t.Error(diff)
+					t.Fatal(diff)
 				}
 
 				u.RawQuery = ""
 				dsn = u.String()
 			}
 			if dsn != testCase.expectedDsn {
-				t.Errorf("expected %s but got %s", testCase.expectedDsn, dsn)
+				t.Fatalf("expected %s but got %s", testCase.expectedDsn, dsn)
 			}
 		})
 	}

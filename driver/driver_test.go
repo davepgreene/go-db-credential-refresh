@@ -31,12 +31,12 @@ func TestCantRegisterADriverWithoutAFactory(t *testing.T) {
 	unregisterAllDrivers()
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("expected a panic when attempting to register a nil factory")
+			t.Fatal("expected a panic when attempting to register a nil factory")
 		}
 	}()
 
 	if err := Register("a driver", nil); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 }
 
@@ -44,7 +44,7 @@ func TestCanRegisterAValidFactory(t *testing.T) {
 	unregisterAllDrivers()
 	defer func() {
 		if r := recover(); r != nil {
-			t.Error("did not expect a panic when attempting to register a valid factory")
+			t.Fatal("did not expect a panic when attempting to register a valid factory")
 		}
 	}()
 
@@ -55,7 +55,7 @@ func TestCanRegisterAValidFactory(t *testing.T) {
 	Register("a driver", fn) //nolint:errcheck
 	d := drivers()
 	if len(d) != 1 {
-		t.Errorf("expected one driver to be registered but got %d", len(d))
+		t.Fatalf("expected one driver to be registered but got %d", len(d))
 	}
 }
 
@@ -66,15 +66,15 @@ func TestCantRegisterMultipleFactoriesWithTheSameName(t *testing.T) {
 	}
 
 	if err := Register(driverName, fn); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if err := Register(driverName, fn); err == nil {
-		t.Error("expected an error registering a duplicate driver but didn't get one")
+		t.Fatal("expected an error registering a duplicate driver but didn't get one")
 	}
 	d := drivers()
 	if len(d) != 1 || d[0] != driverName {
-		t.Errorf("expected one driver to be registered but got %d", len(d))
+		t.Fatalf("expected one driver to be registered but got %d", len(d))
 	}
 }
 
@@ -88,31 +88,31 @@ func TestCanCreateADriverInstance(t *testing.T) {
 			AuthError: func(e error) bool { return true },
 		}
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	ds := drivers()
 	if len(ds) != 1 || ds[0] != "a driver" {
-		t.Errorf("expected one driver to be registered but got %d", len(ds))
+		t.Fatalf("expected one driver to be registered but got %d", len(ds))
 	}
 
 	d, err := CreateDriver("a driver")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if d.Driver != nil {
-		t.Errorf("expected a nil driver but got %v", d)
+		t.Fatalf("expected a nil driver but got %v", d)
 	}
 
 	// test formatter
 	expectedFormatter := MysqlFormatter("user", "pass", "host", 0, "", nil)
 	if d.Formatter("user", "pass", "host", 0, "", nil) != expectedFormatter {
-		t.Error("Formatter should be mysqlFormatter but wasn't")
+		t.Fatal("Formatter should be mysqlFormatter but wasn't")
 	}
 
 	if !d.AuthError(errors.New("foo")) {
-		t.Error("AuthError should be true but wasn't")
+		t.Fatal("AuthError should be true but wasn't")
 	}
 }
 
@@ -121,10 +121,10 @@ func TestCantCreateMissingDriver(t *testing.T) {
 
 	_, err := CreateDriver("a driver") //nolint:dogsled
 	if err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 
 	if !strings.Contains(err.Error(), "invalid Driver name") {
-		t.Errorf("expected 'invalid Driver name' in error but got %s", err)
+		t.Fatalf("expected 'invalid Driver name' in error but got %s", err)
 	}
 }

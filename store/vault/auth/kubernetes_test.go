@@ -101,7 +101,7 @@ func TestKubernetesAuth(t *testing.T) {
 		"kubernetes_host":    srv.URL,
 		"kubernetes_ca_cert": testCACert,
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	role := "example"
@@ -111,37 +111,37 @@ func TestKubernetesAuth(t *testing.T) {
 		"bound_service_account_names":      userName[len(userName)-1],
 		"bound_service_account_namespaces": "default",
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	tmpfile, err := ioutil.TempFile("", "")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	defer os.Remove(tmpfile.Name()) //nolint:errcheck
 
 	if _, err = tmpfile.Write([]byte(jwtData)); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if err = tmpfile.Close(); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	a := NewKubernetesAuth(role, tmpfile.Name())
 	token, err := a.GetToken(ctx, client)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if token == "" {
-		t.Error("expected a token but didn't get one")
+		t.Fatal("expected a token but didn't get one")
 	}
 
 	// Verify the token
 	client.SetToken(token)
 	resp, err := client.Logical().ReadWithContext(ctx, tokenSelfLookupPath)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if resp == nil {
@@ -154,11 +154,11 @@ func TestKubernetesAuth(t *testing.T) {
 
 	path, ok := resp.Data["path"]
 	if !ok {
-		t.Error("expected 'path' to be in auth response data")
+		t.Fatal("expected 'path' to be in auth response data")
 	}
 
 	if path != "auth/kubernetes/login" {
-		t.Errorf("expected 'path' to be k8s login path but got %s instead", path)
+		t.Fatalf("expected 'path' to be k8s login path but got %s instead", path)
 	}
 }
 
@@ -167,11 +167,11 @@ func TestKubernetesAuthFileError(t *testing.T) {
 	k := NewKubernetesAuth("role", p)
 	client, err := api.NewClient(nil)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	_, err = k.GetToken(context.Background(), client)
 	if err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 
 	pathErr := &os.PathError{
@@ -180,7 +180,7 @@ func TestKubernetesAuthFileError(t *testing.T) {
 		Err:  errors.New("no such file or directory"),
 	}
 	if err.Error() != pathErr.Error() {
-		t.Errorf("expected error to be '%v' but got '%v' instead", pathErr, err)
+		t.Fatalf("expected error to be '%v' but got '%v' instead", pathErr, err)
 	}
 }
 
@@ -192,7 +192,7 @@ func TestKubernetesAuthVaultError(t *testing.T) {
 
 	client, err := api.NewClient(nil)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if err = client.SetAddress(srv.URL); err != nil {
@@ -201,35 +201,35 @@ func TestKubernetesAuthVaultError(t *testing.T) {
 
 	tmpfile, err := ioutil.TempFile("", "")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	defer os.Remove(tmpfile.Name()) //nolint:errcheck
 
 	if _, err = tmpfile.Write([]byte(jwtData)); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if err = tmpfile.Close(); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	k := NewKubernetesAuth("role", tmpfile.Name())
 	_, err = k.GetToken(context.Background(), client)
 	if err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 
 	respErr := &api.ResponseError{}
 	if errors.As(err, &respErr) {
 		if respErr.StatusCode != http.StatusNotFound {
-			t.Errorf("expected to get a %d but got a %d instead", http.StatusNotFound, respErr.StatusCode)
+			t.Fatalf("expected to get a %d but got a %d instead", http.StatusNotFound, respErr.StatusCode)
 		}
 
 		loginURL := fmt.Sprintf("%s/v1/auth/kubernetes/login", srv.URL)
 		if respErr.URL != loginURL {
-			t.Errorf("expected URL to be %s but got %s instead", loginURL, respErr.URL)
+			t.Fatalf("expected URL to be %s but got %s instead", loginURL, respErr.URL)
 		}
 		if respErr.HTTPMethod != http.MethodPut {
-			t.Errorf("expected method %s but got %s instead", http.MethodPut, respErr.HTTPMethod)
+			t.Fatalf("expected method %s but got %s instead", http.MethodPut, respErr.HTTPMethod)
 		}
 	}
 }

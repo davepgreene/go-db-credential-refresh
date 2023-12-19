@@ -32,41 +32,41 @@ var testMapper Mapper = func(s string) (*store.Credential, error) {
 func TestNewAgentDatabaseCredentials(t *testing.T) {
 	tmpfile, err := ioutil.TempFile("", "")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	defer os.Remove(tmpfile.Name())
 
 	contents := fmt.Sprintf("%s:%s", username, password)
 
 	if _, err = tmpfile.Write([]byte(contents)); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if err = tmpfile.Close(); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	adc := NewAgentDatabaseCredentials(testMapper, tmpfile.Name())
 
 	credStr, err := adc.GetCredentials(context.Background(), nil)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if credStr != contents {
-		t.Errorf("expected credential string to equal '%s' but got '%s' instead", contents, credStr)
+		t.Fatalf("expected credential string to equal '%s' but got '%s' instead", contents, credStr)
 	}
 
 	mappedCreds, err := adc.Map(credStr)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if mappedCreds.GetUsername() != username {
-		t.Errorf("expected username to be '%s' but got '%s' instead", username, mappedCreds.GetUsername())
+		t.Fatalf("expected username to be '%s' but got '%s' instead", username, mappedCreds.GetUsername())
 	}
 
 	if mappedCreds.GetPassword() != password {
-		t.Errorf("expected password to be '%s' but got '%s' instead", password, mappedCreds.GetPassword())
+		t.Fatalf("expected password to be '%s' but got '%s' instead", password, mappedCreds.GetPassword())
 	}
 }
 
@@ -74,42 +74,42 @@ func TestNewAgentDatabaseCredentialsFailedFileRead(t *testing.T) {
 	adc := NewAgentDatabaseCredentials(testMapper, "")
 	credStr, err := adc.GetCredentials(context.Background(), nil)
 	if err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 	if credStr != "" {
-		t.Errorf("expected an empty output but got %s", credStr)
+		t.Fatalf("expected an empty output but got %s", credStr)
 	}
 }
 
 func TestNewAgentDatabaseCredentialsFailedMapper(t *testing.T) {
 	tmpfile, err := ioutil.TempFile("", "")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	defer os.Remove(tmpfile.Name())
 
 	contents := "foo:bar:baz"
 
 	if _, err = tmpfile.Write([]byte(contents)); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if err = tmpfile.Close(); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	adc := NewAgentDatabaseCredentials(testMapper, tmpfile.Name())
 
 	credStr, err := adc.GetCredentials(context.Background(), nil)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	mappedCreds, err := adc.Map(credStr)
 	if err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 
 	if mappedCreds != nil {
-		t.Errorf("expected a nil credential but got %v instead", mappedCreds)
+		t.Fatalf("expected a nil credential but got %v instead", mappedCreds)
 	}
 }

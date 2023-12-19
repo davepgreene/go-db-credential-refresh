@@ -16,9 +16,9 @@ import (
 
 func TestStoreValidation(t *testing.T) {
 	if _, err := NewStore(nil); err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	} else if !errors.Is(err, errMissingConfig) {
-		t.Errorf("expected '%T' but got '%T' instead", errMissingConfig, err)
+		t.Fatalf("expected '%T' but got '%T' instead", errMissingConfig, err)
 	}
 
 	testCases := []struct {
@@ -102,20 +102,20 @@ func TestStoreValidation(t *testing.T) {
 
 			_, err = NewStore(&conf)
 			if err == nil {
-				t.Error("expected an error but didn't get one")
+				t.Fatal("expected an error but didn't get one")
 
 				return
 			}
 
 			// If we have a pointer to an error we need to compare error strings
 			if reflect.ValueOf(testCase.expectedErr).Kind() == reflect.Ptr && err.Error() != testCase.expectedErr.Error() {
-				t.Errorf("expected '%v' but got '%v' instead", testCase.expectedErr, err)
+				t.Fatalf("expected '%v' but got '%v' instead", testCase.expectedErr, err)
 
 				return
 			}
 
 			if reflect.ValueOf(testCase.expectedErr).Kind() != reflect.Ptr && err != testCase.expectedErr {
-				t.Errorf("expected '%T' but got '%T' instead", testCase.expectedErr, err)
+				t.Fatalf("expected '%T' but got '%T' instead", testCase.expectedErr, err)
 			}
 		})
 	}
@@ -126,7 +126,7 @@ func TestStoreValidation(t *testing.T) {
 		User:        "dbuser",
 		Credentials: aws.AnonymousCredentials{},
 	}); err != nil {
-		t.Errorf("expected no error but got %v instead", err)
+		t.Fatalf("expected no error but got %v instead", err)
 	}
 }
 
@@ -138,22 +138,22 @@ func TestValidStoreCanGenerateToken(t *testing.T) {
 		Credentials: credentials.NewStaticCredentialsProvider("foo", "bar", "baz"),
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	ctx := context.Background()
 
 	creds, err := s.Get(ctx)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if creds.GetUsername() == "" {
-		t.Error("got empty username")
+		t.Fatal("got empty username")
 	}
 
 	if creds.GetPassword() == "" {
-		t.Error("got empty password")
+		t.Fatal("got empty password")
 	}
 }
 
@@ -165,13 +165,13 @@ func TestStoreErrorsOnUnsignableCredentials(t *testing.T) {
 		Credentials: aws.AnonymousCredentials{},
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	ctx := context.Background()
 
 	if _, err := s.Get(ctx); err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 }
 
@@ -183,24 +183,24 @@ func TestStoreCachesCredentials(t *testing.T) {
 		Credentials: credentials.NewStaticCredentialsProvider("foo", "bar", "baz"),
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	ctx := context.Background()
 
 	creds, err := s.Get(ctx)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	username := creds.GetUsername()
 	if username == "" {
-		t.Error("got empty username")
+		t.Fatal("got empty username")
 	}
 
 	password := creds.GetPassword()
 	if password == "" {
-		t.Error("got empty password")
+		t.Fatal("got empty password")
 	}
 
 	// NOTE: This is hacky as hell but necessary because the rdsutil.BuildAuthToken has a hard-coded
@@ -219,23 +219,23 @@ func TestStoreCachesCredentials(t *testing.T) {
 	// Second time through we should have everything cached
 	cachedCreds, err := s.Get(ctx)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if username != cachedCreds.GetUsername() {
-		t.Errorf("expected username to be cached but got %s instead", cachedCreds.GetUsername())
+		t.Fatalf("expected username to be cached but got %s instead", cachedCreds.GetUsername())
 	}
 	if password != cachedCreds.GetPassword() {
-		t.Errorf("expected password to be cached but got %s instead", cachedCreds.GetPassword())
+		t.Fatalf("expected password to be cached but got %s instead", cachedCreds.GetPassword())
 	}
 
 	// On refresh, we should have a new password
 	refreshedCreds, err := s.Refresh(ctx)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if password == refreshedCreds.GetPassword() {
-		t.Error("cached password and refreshed password were the same but expected them not to be", password, refreshedCreds.GetPassword())
+		t.Fatal("cached password and refreshed password were the same but expected them not to be", password, refreshedCreds.GetPassword())
 	}
 }

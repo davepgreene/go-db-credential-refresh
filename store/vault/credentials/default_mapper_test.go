@@ -9,15 +9,15 @@ import (
 func TestDefaultMapperMapsValidCredentials(t *testing.T) {
 	creds, err := DefaultMapper(fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password))
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if creds.GetUsername() != username {
-		t.Errorf("expected username to be '%s' but got '%s' instead", username, creds.GetUsername())
+		t.Fatalf("expected username to be '%s' but got '%s' instead", username, creds.GetUsername())
 	}
 
 	if creds.GetPassword() != password {
-		t.Errorf(" expected password to be '%s' but got '%s' instead", password, creds.GetPassword())
+		t.Fatalf(" expected password to be '%s' but got '%s' instead", password, creds.GetPassword())
 	}
 }
 
@@ -52,9 +52,9 @@ func TestDefaultMapperGetsImproperlyFormedCredentials(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.description, func(t *testing.T) {
 			if creds, err := DefaultMapper(testCase.input); err == nil && creds != nil {
-				t.Errorf("expected an error and nil creds but got no error and %v instead", creds)
+				t.Fatalf("expected an error and nil creds but got no error and %v instead", creds)
 			} else if err != testCase.expectedErr {
-				t.Errorf("expected a '%T' but got '%T'", testCase.expectedErr, err)
+				t.Fatalf("expected a '%T' but got '%T'", testCase.expectedErr, err)
 			}
 		})
 	}
@@ -63,9 +63,9 @@ func TestDefaultMapperGetsImproperlyFormedCredentials(t *testing.T) {
 func TestDefaultMapperGetsUnmarshalableString(t *testing.T) {
 	for _, input := range []string{"foo bar baz", ""} {
 		if creds, err := DefaultMapper(input); err == nil && creds != nil {
-			t.Errorf("expected an error and nil creds but got no error and %v instead", creds)
+			t.Fatalf("expected an error and nil creds but got no error and %v instead", creds)
 		} else if _, ok := err.(*json.SyntaxError); !ok {
-			t.Errorf("expected a 'json.SyntaxError' but got '%T' instead", err)
+			t.Fatalf("expected a 'json.SyntaxError' but got '%T' instead", err)
 		}
 	}
 }

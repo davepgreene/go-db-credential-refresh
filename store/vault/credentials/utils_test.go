@@ -23,7 +23,7 @@ func TestGetFromVaultSecretsAPI(t *testing.T) {
 
 	var resp map[string]interface{}
 	if err := json.Unmarshal([]byte(b), &resp); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	// Testing secret data attributes is a bit brittle unfortunately :(
 	for _, field := range []string{
@@ -36,18 +36,18 @@ func TestGetFromVaultSecretsAPI(t *testing.T) {
 		"type",
 	} {
 		if _, ok := resp[field]; !ok {
-			t.Errorf("expected '%s' to be in response data", field)
+			t.Fatalf("expected '%s' to be in response data", field)
 		}
 	}
 
 	// Invalid path
 	_, err = GetFromVaultSecretsAPI(ctx, client, "flerp/derp/herp")
 	if err == nil {
-		t.Error("expected an error but didn't get one")
+		t.Fatal("expected an error but didn't get one")
 	}
 
 	if !errors.Is(err, errInvalidPath) {
-		t.Errorf("expected a '%T' but got '%T' instead", errInvalidPath, err)
+		t.Fatalf("expected a '%T' but got '%T' instead", errInvalidPath, err)
 	}
 }
 
@@ -60,7 +60,7 @@ func TestGetFromVaultSecretsAPIWithVaultError(t *testing.T) {
 	if _, err := client.Logical().WriteWithContext(ctx, "secret/foo", map[string]interface{}{
 		"secret": "string",
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if _, err := client.Logical().WriteWithContext(ctx, "sys/policy/restricted", map[string]interface{}{
@@ -68,19 +68,19 @@ func TestGetFromVaultSecretsAPIWithVaultError(t *testing.T) {
 			capabilities = ["deny"]
 		}`,
 	}); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	resp, err := client.Logical().WriteWithContext(ctx, "auth/token/create", map[string]interface{}{
 		"policies": []string{"restricted"},
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	client.SetToken(resp.Auth.ClientToken)
 
 	if resp, err := GetFromVaultSecretsAPI(ctx, client, "secret/foo"); err == nil {
-		t.Errorf("expected an error but got '%s' as a response instead", resp)
+		t.Fatalf("expected an error but got '%s' as a response instead", resp)
 	}
 }
