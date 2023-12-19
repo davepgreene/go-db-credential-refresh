@@ -1,8 +1,6 @@
 module github.com/davepgreene/go-db-credential-refresh/store/vault
 
-go 1.21
-
-toolchain go1.21.4
+go 1.18
 
 replace github.com/davepgreene/go-db-credential-refresh => ../../
 
