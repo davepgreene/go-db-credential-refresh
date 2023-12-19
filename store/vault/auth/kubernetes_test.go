@@ -55,6 +55,10 @@ var (
 	}
 )
 
+func runningInGithubActions() bool {
+	return os.Getenv("GITHUB_ACTIONS") == "true"
+}
+
 // this HandlerFunc mocks out an response from k8s's tokenreviews endpoint.
 func tokenReviewHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/apis/authentication.k8s.io/v1/tokenreviews" {
@@ -90,6 +94,10 @@ func tokenReviewHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestKubernetesAuth(t *testing.T) {
+	if runningInGithubActions() {
+		t.Skip("Skipping until testcontainers-go supports docker networking and network aliases")
+	}
+
 	srv := &httptest.Server{
 		Listener: func() net.Listener {
 			// We need to bind to 0.0.0.0 to ensure that the docker container can hit this test server
