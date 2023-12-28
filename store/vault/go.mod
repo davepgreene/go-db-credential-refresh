@@ -6,7 +6,7 @@ replace github.com/davepgreene/go-db-credential-refresh => ../../
 
 require (
 	github.com/davepgreene/go-db-credential-refresh v1.0.0
-	github.com/hashicorp/vault-client-go v0.4.2
+	github.com/hashicorp/vault-client-go v0.4.3
 	github.com/testcontainers/testcontainers-go v0.26.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.26.0
 	github.com/testcontainers/testcontainers-go/modules/vault v0.26.0
