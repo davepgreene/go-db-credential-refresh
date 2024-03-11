@@ -3,13 +3,14 @@ module github.com/davepgreene/go-db-credential-refresh
 go 1.18
 
 require (
-	github.com/go-sql-driver/mysql v1.7.1
+	github.com/go-sql-driver/mysql v1.8.0
 	github.com/go-test/deep v1.1.0
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/lib/pq v1.10.9
 )
 
 require (
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.14.1 // indirect
