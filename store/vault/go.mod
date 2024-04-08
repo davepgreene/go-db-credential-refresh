@@ -7,7 +7,7 @@ replace github.com/davepgreene/go-db-credential-refresh => ../../
 require (
 	github.com/davepgreene/go-db-credential-refresh v1.0.0
 	github.com/hashicorp/vault-client-go v0.4.3
-	github.com/testcontainers/testcontainers-go v0.29.1
+	github.com/testcontainers/testcontainers-go v0.30.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.29.1
 	github.com/testcontainers/testcontainers-go/modules/vault v0.29.1
 	k8s.io/api v0.29.2
@@ -24,7 +24,7 @@ require (
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/cpuguy83/dockercfg v0.3.1 // indirect
 	github.com/distribution/reference v0.5.0 // indirect
-	github.com/docker/docker v25.0.4+incompatible // indirect
+	github.com/docker/docker v25.0.5+incompatible // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/fatih/color v1.16.0 // indirect
