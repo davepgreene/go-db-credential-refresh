@@ -1,6 +1,7 @@
 module github.com/davepgreene/go-db-credential-refresh/store/vault
 
 go 1.21
+toolchain go1.22.2
 
 replace github.com/davepgreene/go-db-credential-refresh => ../../
 
@@ -10,7 +11,7 @@ require (
 	github.com/testcontainers/testcontainers-go v0.29.1
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.29.1
 	github.com/testcontainers/testcontainers-go/modules/vault v0.29.1
-	k8s.io/api v0.29.2
+	k8s.io/api v0.30.1
 )
 
 require (
@@ -83,7 +84,7 @@ require (
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/exp v0.0.0-20240314144324-c7f7c6466f7f // indirect
 	golang.org/x/mod v0.16.0 // indirect
-	golang.org/x/net v0.22.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
@@ -93,7 +94,7 @@ require (
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/apimachinery v0.29.2 // indirect
+	k8s.io/apimachinery v0.30.1 // indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/utils v0.0.0-20240310230437-4693a0247e57 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
