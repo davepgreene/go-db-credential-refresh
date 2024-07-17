@@ -1,6 +1,6 @@
 .PHONY: all
 
-GOLANG_CI_LINT_VERSION=1.56.2
+GOLANG_CI_LINT_VERSION=1.59.1
 GO_BIN=$(shell pwd)/.build
 export
 
