@@ -1,13 +1,12 @@
-name: "CodeQL"
-
+---
+name: CodeQL
 on:
   push:
     branches: [master]
   pull_request:
     branches: [master]
   schedule:
-    - cron: "38 22 * * 1"
-
+    - cron: 38 22 * * 1
 jobs:
   analyze:
     name: Analyze
@@ -16,13 +15,11 @@ jobs:
       actions: read
       contents: read
       security-events: write
-    strategy:
-      fail-fast: false
     steps:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.21.x
+          go-version: 1.22.x
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Initialize CodeQL

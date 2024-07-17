@@ -1,31 +1,30 @@
+---
 name: Lint
-
 on:
   push:
     branches: [master]
   pull_request:
     branches: [master]
-
 jobs:
   lint:
     runs-on: ubuntu-latest
-    name: ${{ matrix.name }} - 1.21
+    name: ${{ matrix.name }} - 1.22
     strategy:
       matrix:
-        dir: [".", "./store/awsrds", "./store/vault"]
+        dir: [., ./store/awsrds, ./store/vault]
         include:
-          - dir: "."
-            name: "go-db-credential-refresh"
-          - dir: "./store/awsrds"
-            name: "store/awsrds"
-          - dir: "./store/vault"
-            name: "store/vault"
+          - dir: .
+            name: go-db-credential-refresh
+          - dir: ./store/awsrds
+            name: store/awsrds
+          - dir: ./store/vault
+            name: store/vault
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: 1.21
-          cache-dependency-path: "${{ matrix.dir }}/go.sum"
+          go-version: 1.22
+          cache-dependency-path: ${{ matrix.dir }}/go.sum
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v4
         with:
