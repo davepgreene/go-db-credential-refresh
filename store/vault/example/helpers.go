@@ -20,7 +20,11 @@ import (
 
 // setupVault sets up a Vault server running in Docker then enables the plugins/configs we need for
 // this example.
-func setupVault(ctx context.Context, dbHost string, dbPort int) (*vault.Client, func() error, error) {
+func setupVault(
+	ctx context.Context,
+	dbHost string,
+	dbPort int,
+) (*vault.Client, func() error, error) {
 	fmt.Println("Creating testcontainers Vault instance")
 
 	client, vaultContainer, err := vaulttest.CreateTestVault(ctx)
@@ -46,7 +50,11 @@ func setupVault(ctx context.Context, dbHost string, dbPort int) (*vault.Client, 
 		return nil, nil, err
 	}
 
-	uri := fmt.Sprintf("postgresql://{{username}}:{{password}}@%s:%d/?sslmode=disable", dbHost, dbPort)
+	uri := fmt.Sprintf(
+		"postgresql://{{username}}:{{password}}@%s:%d/?sslmode=disable",
+		dbHost,
+		dbPort,
+	)
 
 	fmt.Println("Configuring the postgres database and role")
 	// TODO: Switch this to using generated methods once the vault client implements the db-specific options
@@ -81,8 +89,8 @@ func setupVault(ctx context.Context, dbHost string, dbPort int) (*vault.Client, 
 
 // setupDb sets up a test postgres database for use in the example.
 func setupDb(ctx context.Context) (*postgres.PostgresContainer, error) {
-	return postgres.RunContainer(ctx,
-		testcontainers.WithImage("docker.io/postgres:15.2-alpine"),
+	return postgres.Run(ctx,
+		"docker.io/postgres:15.2-alpine",
 		postgres.WithDatabase(dbName),
 		postgres.WithUsername(username),
 		postgres.WithPassword(password),
@@ -94,7 +102,10 @@ func setupDb(ctx context.Context) (*postgres.PostgresContainer, error) {
 }
 
 // generateDriverConfig is a convenience method for generating a driver config from a testcontainer db
-func generateDriverConfig(ctx context.Context, dbc *postgres.PostgresContainer) (*driver.Config, error) {
+func generateDriverConfig(
+	ctx context.Context,
+	dbc *postgres.PostgresContainer,
+) (*driver.Config, error) {
 	connStr, err := dbc.ConnectionString(ctx, "sslmode=disable")
 	if err != nil {
 		return nil, err

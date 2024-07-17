@@ -6,7 +6,6 @@ import (
 	"time"
 
 	vaultclient "github.com/hashicorp/vault-client-go"
-	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/vault"
 )
 
@@ -22,10 +21,13 @@ type TokenCarryingClient struct {
 func CreateTestVault(ctx context.Context) (*TokenCarryingClient, *vault.VaultContainer, error) {
 	rootToken := RandString(tokenLength)
 
-	vaultContainer, err := vault.RunContainer(ctx, vault.WithToken(rootToken), vault.WithInitCommand(
-		"auth enable kubernetes", // Enable the kubernetes auth method
-	),
-		testcontainers.WithImage("hashicorp/vault:1.15.4"),
+	vaultContainer, err := vault.Run(
+		ctx,
+		"hashicorp/vault:1.15.4",
+		vault.WithToken(rootToken),
+		vault.WithInitCommand(
+			"auth enable kubernetes", // Enable the kubernetes auth method
+		),
 	)
 	if err != nil {
 		return nil, nil, err

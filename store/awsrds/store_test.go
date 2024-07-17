@@ -22,9 +22,9 @@ func TestStoreValidation(t *testing.T) {
 	}
 
 	testCases := []struct {
-		description string
-		fields      map[string]interface{}
 		expectedErr error
+		fields      map[string]interface{}
+		description string
 	}{
 		{
 			description: "missing endpoint",
@@ -108,13 +108,15 @@ func TestStoreValidation(t *testing.T) {
 			}
 
 			// If we have a pointer to an error we need to compare error strings
-			if reflect.ValueOf(testCase.expectedErr).Kind() == reflect.Ptr && err.Error() != testCase.expectedErr.Error() {
+			if reflect.ValueOf(testCase.expectedErr).Kind() == reflect.Ptr &&
+				err.Error() != testCase.expectedErr.Error() {
 				t.Fatalf("expected '%v' but got '%v' instead", testCase.expectedErr, err)
 
 				return
 			}
 
-			if reflect.ValueOf(testCase.expectedErr).Kind() != reflect.Ptr && err != testCase.expectedErr {
+			if reflect.ValueOf(testCase.expectedErr).Kind() != reflect.Ptr &&
+				err != testCase.expectedErr {
 				t.Fatalf("expected '%T' but got '%T' instead", testCase.expectedErr, err)
 			}
 		})
@@ -206,6 +208,7 @@ func TestStoreCachesCredentials(t *testing.T) {
 	// NOTE: This is hacky as hell but necessary because the rdsutil.BuildAuthToken has a hard-coded
 	// 15 minute expiration for each signed token. To ensure we don't repeatedly generate the same signing
 	// token we need to wind the clock forward past the 15 minute window.
+	// See https://github.com/aws/aws-sdk-go-v2/blob/main/feature/rds/auth/connect.go#L86
 	var patch *monkey.PatchGuard
 
 	patch = monkey.Patch(time.Now, func() time.Time {
@@ -236,6 +239,10 @@ func TestStoreCachesCredentials(t *testing.T) {
 	}
 
 	if password == refreshedCreds.GetPassword() {
-		t.Fatal("cached password and refreshed password were the same but expected them not to be", password, refreshedCreds.GetPassword())
+		t.Fatal(
+			"cached password and refreshed password were the same but expected them not to be",
+			password,
+			refreshedCreds.GetPassword(),
+		)
 	}
 }

@@ -49,9 +49,10 @@ func init() { //nolint:gochecknoinits
 // Note: Register behaves similarly to database/sql.Register except that it doesn't
 // panic on duplicate registrations, it just ignores them and continues.
 // The reason we Register drivers separately from database/sql is because
-// 	a) most DB drivers already call database/sql.Register in an init() func
-// 	b) we need to carry a lot more information along with the driver to ensure our
-// 	   connector logic works correctly.
+//
+//	a) most DB drivers already call database/sql.Register in an init() func
+//	b) we need to carry a lot more information along with the driver to ensure our
+//	   connector logic works correctly.
 func Register(name string, f factory) error {
 	driverMu.Lock()
 	defer driverMu.Unlock()

@@ -56,3 +56,6 @@ lint-setup: _bin
 
 _bin:
 	mkdir -p "$(GO_BIN)"
+
+format:
+	gofmt -w -e .

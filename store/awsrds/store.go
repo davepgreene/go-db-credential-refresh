@@ -37,10 +37,10 @@ type Store struct {
 
 // Config contains configuration information.
 type Config struct {
+	Credentials aws.CredentialsProvider
 	Endpoint    string // Endpoint takes the form of host:port
 	Region      string
 	User        string
-	Credentials aws.CredentialsProvider
 }
 
 // NewStore creates a new RDS-backed store.
@@ -61,7 +61,7 @@ func NewStore(c *Config) (*Store, error) {
 		return nil, &errMissingConfigItem{item: "user"}
 	}
 
-	if !(strings.HasPrefix(c.Endpoint, "http://") || strings.HasPrefix(c.Endpoint, "https://")) {
+	if !strings.HasPrefix(c.Endpoint, "http://") && !strings.HasPrefix(c.Endpoint, "https://") {
 		c.Endpoint = "http://" + c.Endpoint
 	}
 
