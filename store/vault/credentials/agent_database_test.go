@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -30,7 +29,7 @@ var testMapper Mapper = func(s string) (*store.Credential, error) {
 }
 
 func TestNewAgentDatabaseCredentials(t *testing.T) {
-	tmpfile, err := ioutil.TempFile("", "")
+	tmpfile, err := os.CreateTemp("", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,11 +61,19 @@ func TestNewAgentDatabaseCredentials(t *testing.T) {
 	}
 
 	if mappedCreds.GetUsername() != username {
-		t.Fatalf("expected username to be '%s' but got '%s' instead", username, mappedCreds.GetUsername())
+		t.Fatalf(
+			"expected username to be '%s' but got '%s' instead",
+			username,
+			mappedCreds.GetUsername(),
+		)
 	}
 
 	if mappedCreds.GetPassword() != password {
-		t.Fatalf("expected password to be '%s' but got '%s' instead", password, mappedCreds.GetPassword())
+		t.Fatalf(
+			"expected password to be '%s' but got '%s' instead",
+			password,
+			mappedCreds.GetPassword(),
+		)
 	}
 }
 
@@ -82,7 +89,7 @@ func TestNewAgentDatabaseCredentialsFailedFileRead(t *testing.T) {
 }
 
 func TestNewAgentDatabaseCredentialsFailedMapper(t *testing.T) {
-	tmpfile, err := ioutil.TempFile("", "")
+	tmpfile, err := os.CreateTemp("", "")
 	if err != nil {
 		t.Fatal(err)
 	}
