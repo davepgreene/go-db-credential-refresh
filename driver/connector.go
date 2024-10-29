@@ -9,12 +9,12 @@ import (
 
 // Config is a struct that holds non-credential database configuration.
 type Config struct {
-	Host      string
-	Port      int
-	DB        string
 	Opts      map[string]string
-	Retries   int
 	Formatter Formatter
+	Host      string
+	DB        string
+	Port      int
+	Retries   int
 }
 
 var (
@@ -108,7 +108,14 @@ func (c *Connector) Connect(ctx context.Context) (driver.Conn, error) {
 			return nil, err
 		}
 
-		connStr = c.formatter(creds.GetUsername(), creds.GetPassword(), c.cfg.Host, c.cfg.Port, c.cfg.DB, c.cfg.Opts)
+		connStr = c.formatter(
+			creds.GetUsername(),
+			creds.GetPassword(),
+			c.cfg.Host,
+			c.cfg.Port,
+			c.cfg.DB,
+			c.cfg.Opts,
+		)
 
 		conn, err = c.driver.Open(connStr)
 		if err == nil {
