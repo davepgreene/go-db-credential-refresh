@@ -59,3 +59,8 @@ _bin:
 
 format:
 	gofmt -w -e .
+
+tidy:
+	go mod tidy
+	cd store/awsrds && go mod tidy
+	cd store/vault && go mod tidy
