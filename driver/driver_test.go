@@ -4,6 +4,11 @@ import (
 	"errors"
 	"strings"
 	"testing"
+
+	"github.com/go-sql-driver/mysql"
+	"github.com/jackc/pgx/v4/stdlib"
+	v5 "github.com/jackc/pgx/v5/stdlib"
+	"github.com/lib/pq"
 )
 
 const (
@@ -27,7 +32,7 @@ func TestAvailableDriversAreRegistered(t *testing.T) {
 	}
 }
 
-func TestCantRegisterADriverWithoutAFactory(t *testing.T) {
+func TestCantRegisterADriverWithNilFactory(t *testing.T) {
 	unregisterAllDrivers()
 	defer func() {
 		if r := recover(); r == nil {
@@ -38,6 +43,23 @@ func TestCantRegisterADriverWithoutAFactory(t *testing.T) {
 	if err := Register("a driver", nil); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestRegisterAllWithANilFactoryPanics(t *testing.T) {
+	tmpAvailableDrivers := availableDrivers
+	availableDrivers = map[string]factory{
+		"pgx": nil,
+	}
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fatal("expected a panic when attempting to create a driver")
+		}
+
+		availableDrivers = tmpAvailableDrivers
+	}()
+
+	registerAllDrivers()
 }
 
 func TestCanRegisterAValidFactory(t *testing.T) {
@@ -69,8 +91,19 @@ func TestCantRegisterMultipleFactoriesWithTheSameName(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := Register(driverName, fn); err == nil {
+	err := Register(driverName, fn)
+	if err == nil {
 		t.Fatal("expected an error registering a duplicate driver but didn't get one")
+	}
+
+	expectedError := errFactoryAlreadyRegistered{driverName}
+
+	if err.Error() != expectedError.Error() {
+		t.Fatalf(
+			"expected error to be %s but got %s instead",
+			expectedError.Error(),
+			err.Error(),
+		)
 	}
 	d := drivers()
 	if len(d) != 1 || d[0] != driverName {
@@ -126,5 +159,46 @@ func TestCantCreateMissingDriver(t *testing.T) {
 
 	if !strings.Contains(err.Error(), "invalid Driver name") {
 		t.Fatalf("expected 'invalid Driver name' in error but got %s", err)
+	}
+}
+
+func TestCanCreateAllDrivers(t *testing.T) {
+	registerAllDrivers()
+	for k := range availableDrivers {
+		d, err := CreateDriver(k)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		switch k {
+		case "pgx":
+			if driver, ok := d.Driver.(*v5.Driver); !ok {
+				t.Fatalf(
+					"expected pgx factory to create a v5 *stdlib.Driver but got a %T instead",
+					driver,
+				)
+			}
+		case "pgxv4":
+			if driver, ok := d.Driver.(*stdlib.Driver); !ok {
+				t.Fatalf(
+					"expected pgxv4 factory to create a v4 *stdlib.Driver but got a %T instead",
+					driver,
+				)
+			}
+		case "pq":
+			if driver, ok := d.Driver.(*pq.Driver); !ok {
+				t.Fatalf(
+					"expected pq factory to create a *pq.Driver but got a %T instead",
+					driver,
+				)
+			}
+		case "mysql":
+			if driver, ok := d.Driver.(*mysql.MySQLDriver); !ok {
+				t.Fatalf(
+					"expected mysql factory to create a *mysql.MySQLDriver but got a %T instead",
+					driver,
+				)
+			}
+		}
 	}
 }
