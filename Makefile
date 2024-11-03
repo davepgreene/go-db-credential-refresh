@@ -20,7 +20,7 @@ test:
 	@echo "Testing Vault store"
 	cd store/vault && $(MAKE) test
 	@echo "Testing main module"
-	go test ./... -count=1 -coverprofile=cover.out
+	go test github.com/davepgreene/go-db-credential-refresh/driver -count=1 -coverprofile=cover.out
 
 lint: lint-setup
 	@echo "Linting AWS RDS store"

@@ -14,17 +14,20 @@ else
 	$(error You must define the GO_BIN variable)
 endif
 
-build:
+build-default:
 	go build ./...
 
-test:
+test-default:
 	go test ./... -count=1 -coverprofile=cover.out
 
-bench:
+bench-default:
 	go test ./... -bench -count=1 -coverprofile=cover.out
 
-cover: test
+cover-default: test-default
 	go tool cover -html=cover.out -o "$(GO_BIN)/coverage/$(MODULE).html"
 
-lint:
+lint-default:
 	"$(GO_BIN)/golangci-lint" run ./...
+
+%:  %-default
+	@  true
