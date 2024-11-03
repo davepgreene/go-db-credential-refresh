@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/jackc/pgx/v4/stdlib"
+	v5 "github.com/jackc/pgx/v5/stdlib"
 	"github.com/lib/pq"
 )
 
@@ -34,11 +35,15 @@ var (
 	driverMu         sync.RWMutex
 	driverFactories  = make(map[string]factory)
 	availableDrivers = map[string]factory{
-		"pgx":   pgxDriver,
+		"pgxv4": pgxDriver,
+		"pgx":   pgxV5Driver,
 		"mysql": mysqlDriver,
 		"pq":    pqDriver,
 	}
-	errInvalidDriverName = fmt.Errorf("invalid Driver name. Must be one of: %s", strings.Join(drivers(), ", "))
+	errInvalidDriverName = fmt.Errorf(
+		"invalid Driver name. Must be one of: %s",
+		strings.Join(drivers(), ", "),
+	)
 )
 
 func init() { //nolint:gochecknoinits
@@ -125,6 +130,14 @@ func mysqlDriver() *Driver {
 func pgxDriver() *Driver {
 	return &Driver{
 		Driver:    &stdlib.Driver{},
+		Formatter: PgFormatter,
+		AuthError: PostgreSQLAuthError,
+	}
+}
+
+func pgxV5Driver() *Driver {
+	return &Driver{
+		Driver:    &v5.Driver{},
 		Formatter: PgFormatter,
 		AuthError: PostgreSQLAuthError,
 	}
