@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"testing"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/jackc/pgx/v4/stdlib"
@@ -47,7 +48,9 @@ var (
 )
 
 func init() { //nolint:gochecknoinits
-	registerAllDrivers()
+	if !testing.Testing() {
+		registerAllDrivers()
+	}
 }
 
 // Register registers a DB driver
