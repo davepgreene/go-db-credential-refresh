@@ -13,14 +13,18 @@ type ResponseHandler func(r *http.Response) (driver.Credentials, error)
 
 // HTTPTestConnectingStore is a store implementation that connects to an endpoint to retrieve credentials
 type HTTPTestConnectingStore struct {
-	url     string
-	method  string
 	headers http.Header
 	handler ResponseHandler
+	url     string
+	method  string
 }
 
 // NewHTTPTestConnectingStore creates a new instance of a HTTPTestConnectingStore
-func NewHTTPTestConnectingStore(url, method string, headers http.Header, handler ResponseHandler) (*HTTPTestConnectingStore, error) { //nolint:revive
+func NewHTTPTestConnectingStore(
+	url, method string,
+	headers http.Header,
+	handler ResponseHandler,
+) (*HTTPTestConnectingStore, error) { //nolint:revive
 	if handler == nil {
 		return nil, errors.New("handler must be implemented")
 	}

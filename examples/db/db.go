@@ -4,16 +4,17 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 // Ping the database to verify DSN provided by the user is valid and the
 // server accessible. If the ping fails exit the program with an error.
 func Ping(ctx context.Context, db *sql.DB) error {
-	fmt.Println("ping")
+	log.Println("PING")
 	if err := db.PingContext(ctx); err != nil {
 		return fmt.Errorf("unable to connect to database: %w", err)
 	}
-	fmt.Println("pong")
+	log.Println("PONG")
 
 	return nil
 }

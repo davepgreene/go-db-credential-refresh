@@ -6,7 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -25,6 +26,9 @@ const (
 	password = "postgres"
 	dbName   = "postgres"
 	port     = 5432
+
+	maxOpenConns = 5
+	maxIdleConns = 2
 )
 
 // This example assumes a PostgreSQL database running on localhost:5432
@@ -39,47 +43,51 @@ func main() {
 		return
 	}
 
-	fmt.Println(err)
-	os.Exit(1)
+	log.Fatal(err)
 }
 
 func Run() error {
 	var err error
 
-	url, close := setupTestServer()
-	defer close()
+	u, serverClose := setupTestServer()
+	defer serverClose()
 
-	store, err := NewHTTPTestConnectingStore(url, "GET", nil, func(r *http.Response) (driver.Credentials, error) {
-		b, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			return nil, err
-		}
+	s, err := NewHTTPTestConnectingStore(
+		u,
+		"GET",
+		nil,
+		func(r *http.Response) (driver.Credentials, error) {
+			b, err := io.ReadAll(r.Body)
+			if err != nil {
+				return nil, err
+			}
 
-		var v map[string]interface{}
-		if err := json.Unmarshal([]byte(b), &v); err != nil {
-			return nil, err
-		}
+			var v map[string]any
+			if err := json.Unmarshal([]byte(b), &v); err != nil {
+				return nil, err
+			}
 
-		username, ok := v["username"].(string)
-		if !ok {
-			return nil, errors.New("missing username")
-		}
+			username, ok := v["username"].(string)
+			if !ok {
+				return nil, errors.New("missing username")
+			}
 
-		password, ok := v["password"].(string)
-		if !ok {
-			return nil, errors.New("missing password")
-		}
+			password, ok := v["password"].(string)
+			if !ok {
+				return nil, errors.New("missing password")
+			}
 
-		return &store.Credential{
-			Username: username,
-			Password: password,
-		}, nil
-	})
+			return &store.Credential{
+				Username: username,
+				Password: password,
+			}, nil
+		},
+	)
 	if err != nil {
 		return err
 	}
 
-	c, err := driver.NewConnector(store, "pgx", &driver.Config{
+	c, err := driver.NewConnector(s, "pgx", &driver.Config{
 		Host: host,
 		Port: port,
 		DB:   dbName,
@@ -98,13 +106,13 @@ func Run() error {
 	// connection lifetime very short. In a production environment, Vault role TTLs and
 	// connection lifetime should be tuned based on database performance requirements.
 	database.SetConnMaxLifetime(2 * time.Second)
-	database.SetMaxIdleConns(2)
-	database.SetMaxOpenConns(5)
+	database.SetMaxIdleConns(maxIdleConns)
+	database.SetMaxOpenConns(maxOpenConns)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	appSignal := make(chan os.Signal)
+	appSignal := make(chan os.Signal, 2)
 	signal.Notify(appSignal, os.Interrupt)
 
 	go func() {
@@ -116,7 +124,8 @@ func Run() error {
 		// First ping the DB to open a connection
 		err = db.Ping(ctx, database)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
+
 			break
 		}
 
@@ -126,21 +135,25 @@ func Run() error {
 		// Now get users
 		users, err := db.QueryUsers(ctx, database, nil)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
+
 			break
 		}
 
-		fmt.Println(users)
+		log.Printf("Users: %v", users)
 	}
 
 	return err
 }
 
 func setupTestServer() (string, func()) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		log.Println("Server: retrieved credentials")
 		w.Header().Set("Content-Type", "application/json")
 		resp := fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password)
-		json.NewEncoder(w).Encode(json.RawMessage(resp))
+		if err := json.NewEncoder(w).Encode(json.RawMessage(resp)); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}))
 
 	return ts.URL, ts.Close
