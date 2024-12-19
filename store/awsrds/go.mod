@@ -8,8 +8,8 @@ replace github.com/davepgreene/go-db-credential-refresh => ../../
 
 require (
 	bou.ke/monkey v1.0.2
-	github.com/aws/aws-sdk-go-v2 v1.32.3
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.42
+	github.com/aws/aws-sdk-go-v2 v1.32.7
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.48
 	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.4.22
 	github.com/davepgreene/go-db-credential-refresh v1.0.0
 	github.com/mitchellh/mapstructure v1.5.0
@@ -17,7 +17,7 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
-	github.com/aws/smithy-go v1.22.0 // indirect
+	github.com/aws/smithy-go v1.22.1 // indirect
 	github.com/go-sql-driver/mysql v1.8.1 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.14.3 // indirect
