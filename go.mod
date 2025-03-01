@@ -1,8 +1,8 @@
 module github.com/davepgreene/go-db-credential-refresh
 
-go 1.21
+go 1.23.0
 
-toolchain go1.23.2
+toolchain go1.24.0
 
 require (
 	github.com/go-sql-driver/mysql v1.8.1
@@ -26,7 +26,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
-	golang.org/x/crypto v0.28.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/text v0.19.0 // indirect
+	golang.org/x/crypto v0.35.0 // indirect
+	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 )
