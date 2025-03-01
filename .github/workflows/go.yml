@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         dir: [., ./store/awsrds, ./store/vault]
-        version: [1.23]
+        version: [1.23, 1.24]
         include:
           - dir: .
             name: go-db-credential-refresh

@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         dir: [., ./store/awsrds, ./store/vault]
-        version: [1.23]
+        version: [1.23, 1.24]
         include:
           - dir: .
             name: go-db-credential-refresh
@@ -30,7 +30,7 @@ jobs:
         working-directory: ${{ matrix.dir }}
         run: go test -mod=readonly ./... -coverprofile=coverage.txt
       - name: Coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
-          file: ${{ matrix.dir }}/coverage.txt
+          files: ${{ matrix.dir }}/coverage.txt
           token: ${{ secrets.CODECOV_TOKEN }}
