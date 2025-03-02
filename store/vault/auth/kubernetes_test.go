@@ -11,6 +11,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -41,19 +42,29 @@ qevae2NSZJ5r8Fo5Ch3sI63c6GCoUaMM5Ho7mHUM32BeGxy99Z3G6364akR3I819
 qQYZl8EZf4Jznaes/XFP0Yb+IhGXBoR9Ib+I
 -----END CERTIFICATE-----`
 
-	jwtData      = `eyJhbGciOiJSUzI1NiIsImtpZCI6IlpJOEY4RHVoMktrY0JxTjhGSGxyMEhER2l2OEtFR2xFSnlITUZRc1UwZ28ifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6InZhdWx0LWF1dGgtdG9rZW4tdmQ0bjQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoidmF1bHQtYXV0aCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjlhZjM3NjRlLWZmZDMtNDJiZC1hZjVkLTE2MzUwZTM0NjkyYyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OnZhdWx0LWF1dGgifQ.ZfkKFqeAIaNXmk-i7LwrXXoOIjv4WlQ1gHFOXHpSo0Wdq16KKu1VOnCkzUh9bIApL5pIXZu4-eYwP2SwokRafXBY_5znqvXoI3F1fxmw25jBT9ZeyDEKZOxyO7mtHnh7LZQ_pBUPPflClhAwacbBrTjnIpHoiWq-Z1_BeuenlRdBYQYjdXEOPK-W1bFbCqx4hq_x91v-JMAcJqQUf0ZSY3jU-vcAOmFfv_0S4K2_syUyfkYVPr_pX-0wOvwkv0nDhV-fhqux51onQyYDd_gejvjGvviDJcbXxT4sIYgbS8IKtRwI3lAhpQQyuaQbVI6DKASs9z-jvvg0VO7T2FMFIw`
-	jwtUID       = "9af3764e-ffd3-42bd-af5d-16350e34692c"
-	jwtUsername  = "system:serviceaccount:default:vault-auth"
-	dockerHostIP = "host.docker.internal"
+	jwtData     = `eyJhbGciOiJSUzI1NiIsImtpZCI6IlpJOEY4RHVoMktrY0JxTjhGSGxyMEhER2l2OEtFR2xFSnlITUZRc1UwZ28ifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6InZhdWx0LWF1dGgtdG9rZW4tdmQ0bjQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoidmF1bHQtYXV0aCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjlhZjM3NjRlLWZmZDMtNDJiZC1hZjVkLTE2MzUwZTM0NjkyYyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OnZhdWx0LWF1dGgifQ.ZfkKFqeAIaNXmk-i7LwrXXoOIjv4WlQ1gHFOXHpSo0Wdq16KKu1VOnCkzUh9bIApL5pIXZu4-eYwP2SwokRafXBY_5znqvXoI3F1fxmw25jBT9ZeyDEKZOxyO7mtHnh7LZQ_pBUPPflClhAwacbBrTjnIpHoiWq-Z1_BeuenlRdBYQYjdXEOPK-W1bFbCqx4hq_x91v-JMAcJqQUf0ZSY3jU-vcAOmFfv_0S4K2_syUyfkYVPr_pX-0wOvwkv0nDhV-fhqux51onQyYDd_gejvjGvviDJcbXxT4sIYgbS8IKtRwI3lAhpQQyuaQbVI6DKASs9z-jvvg0VO7T2FMFIw`
+	jwtUID      = "9af3764e-ffd3-42bd-af5d-16350e34692c"
+	jwtUsername = "system:serviceaccount:default:vault-auth"
 )
 
-var (
-	jwtGroups = []string{
-		"system:serviceaccounts",
-		"system:serviceaccounts:default",
-		"system:authenticated",
+var jwtGroups = []string{
+	"system:serviceaccounts",
+	"system:serviceaccounts:default",
+	"system:authenticated",
+}
+
+func getDockerHostIP() string {
+	switch runtime.GOOS {
+	case "darwin":
+		return "host.docker.internal"
+	case "windows":
+		return "host.docker.internal"
+	case "linux":
+		return "172.17.0.1"
+	default:
+		return ""
 	}
-)
+}
 
 func runningInGithubActions() bool {
 	return os.Getenv("GITHUB_ACTIONS") == "true"
@@ -139,7 +150,7 @@ func TestKubernetesAuth(t *testing.T) {
 	client := tokenAndClient.Client
 
 	if _, err := client.Auth.KubernetesConfigureAuth(ctx, schema.KubernetesConfigureAuthRequest{
-		KubernetesHost:   fmt.Sprintf("http://%s:%s", dockerHostIP, serverUrl.Port()),
+		KubernetesHost:   fmt.Sprintf("http://%s:%s", getDockerHostIP(), serverUrl.Port()),
 		KubernetesCaCert: testCACert,
 	}); err != nil {
 		t.Fatal(err)
@@ -261,7 +272,11 @@ func TestKubernetesAuthVaultError(t *testing.T) {
 	var respErr *vault.ResponseError
 	if errors.As(err, &respErr) {
 		if respErr.StatusCode != http.StatusNotFound {
-			t.Fatalf("expected to get a %d but got a %d instead", http.StatusNotFound, respErr.StatusCode)
+			t.Fatalf(
+				"expected to get a %d but got a %d instead",
+				http.StatusNotFound,
+				respErr.StatusCode,
+			)
 		}
 
 		loginURL := fmt.Sprintf("%s/v1/auth/kubernetes/login", srv.URL)
@@ -270,7 +285,11 @@ func TestKubernetesAuthVaultError(t *testing.T) {
 			t.Fatalf("expected URL to be %s but got %s instead", loginURL, responseErrorURL)
 		}
 		if respErr.OriginalRequest.Method != http.MethodPost {
-			t.Fatalf("expected method %s but got %s instead", http.MethodPut, respErr.OriginalRequest.Method)
+			t.Fatalf(
+				"expected method %s but got %s instead",
+				http.MethodPut,
+				respErr.OriginalRequest.Method,
+			)
 		}
 	}
 }
