@@ -2,14 +2,14 @@ module github.com/davepgreene/go-db-credential-refresh/store/awsrds
 
 go 1.23.0
 
-toolchain go1.24.0
+toolchain go1.24.1
 
 replace github.com/davepgreene/go-db-credential-refresh => ../../
 
 require (
 	bou.ke/monkey v1.0.2
 	github.com/aws/aws-sdk-go-v2 v1.36.3
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.62
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.65
 	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.5.11
 	github.com/davepgreene/go-db-credential-refresh v1.0.0
 	github.com/mitchellh/mapstructure v1.5.0
