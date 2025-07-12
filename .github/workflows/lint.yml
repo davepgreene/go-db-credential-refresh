@@ -27,7 +27,7 @@ jobs:
           go-version: ${{ matrix.version }}
           cache-dependency-path: ${{ matrix.dir }}/go.sum
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v8
         with:
           version: latest
           working-directory: ${{ matrix.dir }}

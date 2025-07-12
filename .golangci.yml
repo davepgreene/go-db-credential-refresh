@@ -1,60 +1,79 @@
+version: "2"
 linters:
-  disable-all: true
+  default: none
   enable:
-    - govet
-    - unused
-    - staticcheck
-    - revive
     - errcheck
+    - gosec
+    - govet
     - ineffassign
     - misspell
     - nlreturn
-    - gosec
-
-run:
-  timeout: 5m
-
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - funlen
-        - bodyclose
-        - gosec
-        - revive
-    - path: example/
-      text: "avoid magic numbers"
-
-linters-settings:
-  govet:
-    disable:
-      - fieldalignment
-  revive:
-    enable-all-rules: true
+    - revive
+    - staticcheck
+    - unused
+  settings:
+    govet:
+      disable:
+        - fieldalignment
+    revive:
+      enable-all-rules: true
+      rules:
+        - name: cognitive-complexity
+          disabled: true
+        - name: line-length-limit
+          arguments:
+            - 120
+        - name: function-length
+          arguments:
+            - 50
+            - 0
+        - name: argument-limit
+          disabled: true
+        - name: banned-characters
+          disabled: true
+        - name: cyclomatic
+          arguments:
+            - 15
+        - name: function-result-limit
+          arguments:
+            - 3
+        - name: max-public-structs
+          arguments:
+            - 3
+        - name: file-header
+          disabled: true
+        - name: add-constant
+          arguments:
+            - allowInts: 0,1,2
+              allowStrs: '""'
+        - name: unhandled-error
+          arguments:
+            - fmt.Printf
+            - fmt.Println
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
     rules:
-      - name: cognitive-complexity
-        disabled: true
-      - name: line-length-limit
-        arguments: [120]
-      - name: function-length
-        arguments: [50, 0]
-      - name: argument-limit
-        disabled: true
-      - name: banned-characters
-        disabled: true
-      - name: cyclomatic
-        arguments: [15]
-      - name: function-result-limit
-        arguments: [3]
-      - name: max-public-structs
-        arguments: [3]
-      - name: file-header
-        disabled: true
-      - name: add-constant
-        arguments:
-          - allowStrs: '""'
-            allowInts: "0,1,2"
-      - name: unhandled-error
-        arguments:
-          - "fmt.Printf"
-          - "fmt.Println"
+      - linters:
+          - bodyclose
+          - funlen
+          - gosec
+          - revive
+        path: _test\.go
+      - path: example/
+        text: avoid magic numbers
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

@@ -15,19 +15,19 @@ else
 endif
 
 build-default:
-	go build ./...
+	@go build ./...
 
 test-default:
-	go test ./... -count=1 -coverprofile=cover.out
+	@go test ./... -count=1 -coverprofile=cover.out
 
 bench-default:
-	go test ./... -bench -count=1 -coverprofile=cover.out
+	@go test ./... -bench -count=1 -coverprofile=cover.out
 
 cover-default: test-default
-	go tool cover -html=cover.out -o "$(GO_BIN)/coverage/$(MODULE).html"
+	@go tool cover -html=cover.out -o "$(GO_BIN)/coverage/$(MODULE).html"
 
 lint-default:
-	"$(GO_BIN)/golangci-lint" run ./...
+	@"$(GO_BIN)/golangci-lint" run ./...
 
 %:  %-default
 	@  true
