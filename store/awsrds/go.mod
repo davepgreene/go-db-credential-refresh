@@ -8,7 +8,7 @@ replace github.com/davepgreene/go-db-credential-refresh => ../../
 
 require (
 	bou.ke/monkey v1.0.2
-	github.com/aws/aws-sdk-go-v2 v1.36.5
+	github.com/aws/aws-sdk-go-v2 v1.36.6
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.70
 	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.5.13
 	github.com/davepgreene/go-db-credential-refresh v1.0.0
