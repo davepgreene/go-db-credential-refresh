@@ -9,19 +9,20 @@ on:
     - cron: 38 22 * * 1
 jobs:
   analyze:
-    name: Analyze
+    name: Analyze (${{ matrix.version }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [1.23, 1.24, 1.25]
     permissions:
       actions: read
       contents: read
       security-events: write
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v5
         with:
-          go-version: 1.22.x
-      - name: Checkout repository
-        uses: actions/checkout@v4
+          go-version: ${{ matrix.version }}
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:

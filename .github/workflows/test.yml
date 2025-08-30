@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         dir: [., ./store/awsrds, ./store/vault]
-        version: [1.23, 1.24]
+        version: [1.23, 1.24, 1.25]
         include:
           - dir: .
             name: go-db-credential-refresh
@@ -21,7 +21,7 @@ jobs:
           - dir: ./store/vault
             name: store/vault
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.version }}

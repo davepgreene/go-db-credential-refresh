@@ -2,8 +2,6 @@ module github.com/davepgreene/go-db-credential-refresh/store/vault
 
 go 1.24.0
 
-toolchain go1.25.0
-
 replace github.com/davepgreene/go-db-credential-refresh => ../../
 
 require (
