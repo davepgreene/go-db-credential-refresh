@@ -10,7 +10,7 @@ require (
 	bou.ke/monkey v1.0.2
 	github.com/aws/aws-sdk-go-v2 v1.38.3
 	github.com/aws/aws-sdk-go-v2/credentials v1.18.10
-	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.5.13
+	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.6.6
 	github.com/davepgreene/go-db-credential-refresh v1.0.0
 	github.com/mitchellh/mapstructure v1.5.0
 )
