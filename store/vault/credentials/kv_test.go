@@ -4,9 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/davepgreene/go-db-credential-refresh/store/vault/vaulttest"
 	"github.com/hashicorp/vault-client-go"
 	"github.com/hashicorp/vault-client-go/schema"
+
+	"github.com/davepgreene/go-db-credential-refresh/store/vault/vaulttest"
 )
 
 func TestNewKvCredentials(t *testing.T) {

@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/davepgreene/go-db-credential-refresh/store"
 	"github.com/hashicorp/vault-client-go"
 
-	"github.com/davepgreene/go-db-credential-refresh/store"
 	vaultcredentials "github.com/davepgreene/go-db-credential-refresh/store/vault/credentials"
 	"github.com/davepgreene/go-db-credential-refresh/store/vault/vaulttest"
 )

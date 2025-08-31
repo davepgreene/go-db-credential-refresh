@@ -7,7 +7,7 @@ GREEN  = \033[32m
 WHITE  = \033[37m
 RESET  = \033[0m
 
-GOLANG_CI_LINT_VERSION=2.2.2
+GOLANG_CI_LINT_VERSION=2.4.0
 GO_BIN=$(shell pwd)/.build
 export
 

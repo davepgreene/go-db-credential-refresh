@@ -8,13 +8,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/davepgreene/go-db-credential-refresh/driver"
 	"github.com/hashicorp/vault-client-go"
 	"github.com/hashicorp/vault-client-go/schema"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 
-	"github.com/davepgreene/go-db-credential-refresh/driver"
 	"github.com/davepgreene/go-db-credential-refresh/store/vault/vaulttest"
 )
 
