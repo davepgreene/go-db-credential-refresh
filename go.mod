@@ -2,8 +2,6 @@ module github.com/davepgreene/go-db-credential-refresh
 
 go 1.23.0
 
-toolchain go1.25.0
-
 require (
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/go-test/deep v1.1.1
