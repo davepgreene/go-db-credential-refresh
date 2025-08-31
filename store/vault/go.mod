@@ -5,7 +5,7 @@ go 1.24.0
 replace github.com/davepgreene/go-db-credential-refresh => ../../
 
 require (
-	github.com/davepgreene/go-db-credential-refresh v1.0.0-placeholder
+	github.com/davepgreene/go-db-credential-refresh v1.2.1
 	github.com/hashicorp/vault-client-go v0.4.3
 	github.com/testcontainers/testcontainers-go v0.38.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.38.0
