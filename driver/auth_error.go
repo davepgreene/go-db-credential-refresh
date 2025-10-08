@@ -11,7 +11,7 @@ type AuthError func(e error) bool
 
 const (
 	MysqlErrorText = "access denied for user"
-	PgErrorText    = "password authentication failed for user"
+	PgErrorText    = "authentication failed for user"
 )
 
 // MySQLAuthError tests whether an error from MySQL is an authentication failure.
