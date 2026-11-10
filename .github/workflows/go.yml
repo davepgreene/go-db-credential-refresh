@@ -21,8 +21,8 @@ jobs:
           - dir: ./store/vault
             name: store/vault
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: ${{ matrix.version }}
           cache-dependency-path: ${{ matrix.dir }}/go.sum

@@ -21,13 +21,13 @@ jobs:
           - dir: ./store/vault
             name: store/vault
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: ${{ matrix.version }}
           cache-dependency-path: ${{ matrix.dir }}/go.sum
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v9
         with:
           version: latest
           working-directory: ${{ matrix.dir }}

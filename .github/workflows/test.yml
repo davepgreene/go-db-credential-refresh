@@ -21,8 +21,8 @@ jobs:
           - dir: ./store/vault
             name: store/vault
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: ${{ matrix.version }}
           cache-dependency-path: ${{ matrix.dir }}/go.sum
@@ -30,7 +30,7 @@ jobs:
         working-directory: ${{ matrix.dir }}
         run: go test -mod=readonly ./... -coverprofile=coverage.txt
       - name: Coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           files: ${{ matrix.dir }}/coverage.txt
           token: ${{ secrets.CODECOV_TOKEN }}
