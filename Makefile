@@ -7,7 +7,7 @@ GREEN  = \033[32m
 WHITE  = \033[37m
 RESET  = \033[0m
 
-GOLANG_CI_LINT_VERSION=2.4.0
+GOLANG_CI_LINT_VERSION=2.15.0
 GO_BIN=$(shell pwd)/.build
 export
 
@@ -59,7 +59,7 @@ lint-setup: _bin
 	$(eval CURRENT_VERSION := $(strip $(shell $(GO_BIN)/golangci-lint version 2>&1 | sed 's/[^0-9.]*\([0-9.]*\).*/\1/')))
 	@if [ "$(CURRENT_VERSION)" != "$(GOLANG_CI_LINT_VERSION)" ]; then \
 		echo "Updating golangci-lint from $(CURRENT_VERSION) to version $(GOLANG_CI_LINT_VERSION)"; \
-		curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(GO_BIN)" "v$(GOLANG_CI_LINT_VERSION)" ; \
+		sh ./tools/install-linter.sh -b "$(GO_BIN)" "v$(GOLANG_CI_LINT_VERSION)" ; \
 	fi
 
 _bin:

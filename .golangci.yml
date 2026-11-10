@@ -1,3 +1,4 @@
+---
 version: "2"
 formatters:
   enable:
@@ -8,10 +9,10 @@ formatters:
     gci:
       sections:
         - standard
+        - blank
         - default
         - blank
-        - dot
-        - localmodule
+        - prefix(github.com/davepgreene/go-db-credential-refresh)
       custom-order: true
   exclusions:
     generated: lax
