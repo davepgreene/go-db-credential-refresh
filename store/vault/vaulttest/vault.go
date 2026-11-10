@@ -11,6 +11,7 @@ import (
 
 const (
 	tokenLength = 52
+	timeout     = 30 * time.Second
 )
 
 type TokenCarryingClient struct {
@@ -42,7 +43,7 @@ func CreateTestVault(ctx context.Context) (*TokenCarryingClient, *vault.VaultCon
 	// the root token.
 	client, err := vaultclient.New(
 		vaultclient.WithAddress(hostAddress),
-		vaultclient.WithRequestTimeout(30*time.Second),
+		vaultclient.WithRequestTimeout(timeout),
 	)
 	if err != nil {
 		return nil, vaultContainer, err

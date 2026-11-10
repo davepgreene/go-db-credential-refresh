@@ -1,4 +1,4 @@
-package vaultcredentials
+package credentials
 
 import (
 	"context"
@@ -8,9 +8,7 @@ import (
 	"github.com/hashicorp/vault-client-go"
 )
 
-var (
-	errInvalidPath = errors.New("invalid path")
-)
+var errInvalidPath = errors.New("invalid path")
 
 // GetFromVaultSecretsAPI is a wrapper over logical reads from a Vault path with marshalling and error handling.
 func GetFromVaultSecretsAPI(ctx context.Context, client *vault.Client, mountPath string, path string) (string, error) {

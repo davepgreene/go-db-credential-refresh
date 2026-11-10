@@ -3,7 +3,7 @@ package driver
 import (
 	"fmt"
 	"net/url"
-	"sort"
+	"slices"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -36,7 +36,7 @@ func PgKVFormatter(username, password, host string, port int, db string, opts ma
 		keys = append(keys, k)
 	}
 
-	sort.Strings(keys)
+	slices.Sort(keys)
 
 	for _, k := range keys {
 		s = fmt.Sprintf("%s %s=%s", s, k, opts[k])

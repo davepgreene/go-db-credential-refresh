@@ -108,14 +108,14 @@ func TestStoreValidation(t *testing.T) {
 			}
 
 			// If we have a pointer to an error we need to compare error strings
-			if reflect.ValueOf(testCase.expectedErr).Kind() == reflect.Ptr &&
+			if reflect.ValueOf(testCase.expectedErr).Kind() == reflect.Pointer &&
 				err.Error() != testCase.expectedErr.Error() {
 				t.Fatalf("expected '%v' but got '%v' instead", testCase.expectedErr, err)
 
 				return
 			}
 
-			if reflect.ValueOf(testCase.expectedErr).Kind() != reflect.Ptr &&
+			if reflect.ValueOf(testCase.expectedErr).Kind() != reflect.Pointer &&
 				err != testCase.expectedErr {
 				t.Fatalf("expected '%T' but got '%T' instead", testCase.expectedErr, err)
 			}

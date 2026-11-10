@@ -1,4 +1,4 @@
-package vaultauth
+package auth
 
 import (
 	"context"

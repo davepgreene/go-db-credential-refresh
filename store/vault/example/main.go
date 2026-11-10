@@ -11,7 +11,6 @@ import (
 
 	"github.com/davepgreene/go-db-credential-refresh/driver"
 	"github.com/davepgreene/go-db-credential-refresh/examples/db"
-
 	"github.com/davepgreene/go-db-credential-refresh/store/vault"
 	vaultcredentials "github.com/davepgreene/go-db-credential-refresh/store/vault/credentials"
 )

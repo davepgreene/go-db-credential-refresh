@@ -29,6 +29,7 @@ const (
 
 	maxOpenConns = 5
 	maxIdleConns = 2
+	sleepTime    = 3 * time.Second
 )
 
 // This example assumes a PostgreSQL database running on localhost:5432
@@ -130,7 +131,7 @@ func Run() error {
 		}
 
 		// Sleep long enough that the creds should expire
-		time.Sleep(3 * time.Second)
+		time.Sleep(sleepTime)
 
 		// Now get users
 		users, err := db.QueryUsers(ctx, database, nil)

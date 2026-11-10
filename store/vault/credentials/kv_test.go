@@ -1,4 +1,4 @@
-package vaultcredentials
+package credentials
 
 import (
 	"context"
@@ -37,7 +37,8 @@ func TestNewKvCredentials(t *testing.T) {
 		Data: map[string]any{
 			"username": username,
 			"password": password,
-		}},
+		},
+	},
 		secretMountPath,
 	); err != nil {
 		t.Fatal(err)

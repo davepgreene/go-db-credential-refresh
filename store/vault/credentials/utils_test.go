@@ -1,4 +1,4 @@
-package vaultcredentials
+package credentials
 
 import (
 	"context"

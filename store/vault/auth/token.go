@@ -1,4 +1,4 @@
-package vaultauth
+package auth
 
 import (
 	"context"
@@ -14,9 +14,7 @@ type TokenAuth struct {
 	token string
 }
 
-var (
-	ErrUnableToLookupToken = errors.New("unable to lookup token information")
-)
+var ErrUnableToLookupToken = errors.New("unable to lookup token information")
 
 // NewTokenAuth creates a new Vault token auth location.
 func NewTokenAuth(token string) *TokenAuth {

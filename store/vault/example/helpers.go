@@ -8,13 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davepgreene/go-db-credential-refresh/driver"
 	"github.com/hashicorp/vault-client-go"
 	"github.com/hashicorp/vault-client-go/schema"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 
+	"github.com/davepgreene/go-db-credential-refresh/driver"
 	"github.com/davepgreene/go-db-credential-refresh/store/vault/vaulttest"
 )
 
@@ -43,10 +43,11 @@ func setupVault(
 	}
 
 	fmt.Println("Mounting the database backend")
-	if _, err := client.Client.System.MountsEnableSecretsEngine(ctx, "database",
+	_, err = client.Client.System.MountsEnableSecretsEngine(ctx, "database",
 		schema.MountsEnableSecretsEngineRequest{
 			Type: "database",
-		}); err != nil {
+		})
+	if err != nil {
 		return nil, nil, err
 	}
 
@@ -58,7 +59,7 @@ func setupVault(
 
 	fmt.Println("Configuring the postgres database and role")
 	// TODO: Switch this to using generated methods once the vault client implements the db-specific options
-	if _, err := client.Client.Write(ctx,
+	_, err = client.Client.Write(ctx,
 		fmt.Sprintf("database/config/%s", dbName),
 		map[string]any{
 			"plugin_name":    "postgresql-database-plugin",
@@ -66,11 +67,12 @@ func setupVault(
 			"connection_url": uri,
 			"username":       username,
 			"password":       password,
-		}); err != nil {
+		})
+	if err != nil {
 		return nil, nil, err
 	}
 
-	if _, err := client.Client.Secrets.DatabaseWriteRole(ctx, role, schema.DatabaseWriteRoleRequest{
+	_, err = client.Client.Secrets.DatabaseWriteRole(ctx, role, schema.DatabaseWriteRoleRequest{
 		DbName: dbName,
 		CreationStatements: []string{
 			`CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'`,
@@ -78,7 +80,8 @@ func setupVault(
 		},
 		DefaultTtl: "2s",
 		MaxTtl:     "5s",
-	}); err != nil {
+	})
+	if err != nil {
 		return nil, nil, err
 	}
 

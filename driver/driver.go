@@ -3,7 +3,7 @@ package driver
 import (
 	"database/sql/driver"
 	"fmt"
-	"sort"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -111,7 +111,7 @@ func Drivers() []string {
 		drivers = append(drivers, k)
 	}
 
-	sort.Strings(drivers)
+	slices.Sort(drivers)
 
 	return drivers
 }
