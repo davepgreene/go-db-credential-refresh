@@ -15,17 +15,10 @@ const (
 	driverName = "a driver"
 )
 
-func unregisterAllDrivers() {
-	driverMu.Lock()
-	defer driverMu.Unlock()
-	// For tests.
-	driverFactories = make(map[string]factory)
-}
-
 func TestAvailableDriversAreRegistered(t *testing.T) {
 	registerAllDrivers()
 	// This is a brittle test but afaik the only way to test init() behaviors
-	for name := range availableDrivers {
+	for _, name := range Drivers() {
 		if _, ok := driverFactories[name]; !ok {
 			t.Fatalf("driver %s was not registered", name)
 		}
@@ -33,7 +26,7 @@ func TestAvailableDriversAreRegistered(t *testing.T) {
 }
 
 func TestCantRegisterADriverWithNilFactory(t *testing.T) {
-	unregisterAllDrivers()
+	UnregisterAll()
 	defer func() {
 		if r := recover(); r == nil {
 			t.Fatal("expected a panic when attempting to register a nil factory")
@@ -63,7 +56,7 @@ func TestRegisterAllWithANilFactoryPanics(t *testing.T) {
 }
 
 func TestCanRegisterAValidFactory(t *testing.T) {
-	unregisterAllDrivers()
+	UnregisterAll()
 	defer func() {
 		if r := recover(); r != nil {
 			t.Fatal("did not expect a panic when attempting to register a valid factory")
@@ -75,14 +68,14 @@ func TestCanRegisterAValidFactory(t *testing.T) {
 	}
 
 	Register("a driver", fn) //nolint:errcheck
-	d := drivers()
+	d := Drivers()
 	if len(d) != 1 {
 		t.Fatalf("expected one driver to be registered but got %d", len(d))
 	}
 }
 
 func TestCantRegisterMultipleFactoriesWithTheSameName(t *testing.T) {
-	unregisterAllDrivers()
+	UnregisterAll()
 	var fn factory = func() *Driver {
 		return &Driver{}
 	}
@@ -105,14 +98,14 @@ func TestCantRegisterMultipleFactoriesWithTheSameName(t *testing.T) {
 			err.Error(),
 		)
 	}
-	d := drivers()
+	d := Drivers()
 	if len(d) != 1 || d[0] != driverName {
 		t.Fatalf("expected one driver to be registered but got %d", len(d))
 	}
 }
 
 func TestCanCreateADriverInstance(t *testing.T) {
-	unregisterAllDrivers()
+	UnregisterAll()
 
 	if err := Register("a driver", func() *Driver {
 		return &Driver{
@@ -124,7 +117,7 @@ func TestCanCreateADriverInstance(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ds := drivers()
+	ds := Drivers()
 	if len(ds) != 1 || ds[0] != "a driver" {
 		t.Fatalf("expected one driver to be registered but got %d", len(ds))
 	}
@@ -150,9 +143,9 @@ func TestCanCreateADriverInstance(t *testing.T) {
 }
 
 func TestCantCreateMissingDriver(t *testing.T) {
-	unregisterAllDrivers()
+	UnregisterAll()
 
-	_, err := CreateDriver("a driver") //nolint:dogsled
+	_, err := CreateDriver("a driver")
 	if err == nil {
 		t.Fatal("expected an error but didn't get one")
 	}

@@ -94,7 +94,7 @@ func (c *testCredential) GetPassword() string {
 }
 
 func TestNewConnectorFailsWithNilConfig(t *testing.T) {
-	unregisterAllDrivers()
+	UnregisterAll()
 	if err := Register("driver", func() *Driver {
 		return &Driver{
 			Driver:    &testDriver{},
@@ -118,7 +118,7 @@ func TestNewConnectorFailsWithNilConfig(t *testing.T) {
 }
 
 func TestNewConnectorWithInvalidDriver(t *testing.T) {
-	unregisterAllDrivers()
+	UnregisterAll()
 
 	getFn := func(ctx context.Context) (Credentials, error) {
 		return nil, nil
@@ -137,7 +137,7 @@ func TestNewConnectorWithInvalidDriver(t *testing.T) {
 }
 
 func TestConnectorErrorsIfStoreGetFailsReturnsNilOrIsInvalid(t *testing.T) {
-	unregisterAllDrivers()
+	UnregisterAll()
 	if err := Register("driver", func() *Driver {
 		return &Driver{
 			Driver:    &testDriver{},
@@ -219,7 +219,7 @@ func TestConnectorErrorsIfStoreGetFailsReturnsNilOrIsInvalid(t *testing.T) {
 }
 
 func TestConnectorCanUseAlternateFormatter(t *testing.T) {
-	unregisterAllDrivers()
+	UnregisterAll()
 	d := &testDriver{}
 	if err := Register("driver", func() *Driver {
 		return &Driver{
@@ -265,7 +265,7 @@ func TestConnectorCanUseAlternateFormatter(t *testing.T) {
 }
 
 func TestConnectorRefreshesCredentialsCorrectly(t *testing.T) {
-	unregisterAllDrivers()
+	UnregisterAll()
 	d := &testDriver{}
 	if err := Register("driver", func() *Driver {
 		return &Driver{
@@ -308,7 +308,7 @@ func TestConnectorRefreshesCredentialsCorrectly(t *testing.T) {
 }
 
 func TestConnectorFailsToConnectThenReconnects(t *testing.T) {
-	unregisterAllDrivers()
+	UnregisterAll()
 	d := &testFailingDriver{
 		ConnErr: errors.New(MysqlErrorText),
 	}
@@ -354,7 +354,7 @@ func TestConnectorFailsToConnectThenReconnects(t *testing.T) {
 }
 
 func TestConnectorFailsToRefreshOnConnectionFailure(t *testing.T) {
-	unregisterAllDrivers()
+	UnregisterAll()
 	d := &testFailingDriver{
 		ConnErr: errors.New(MysqlErrorText),
 	}
@@ -410,7 +410,7 @@ func TestConnectorFailsToRefreshOnConnectionFailure(t *testing.T) {
 }
 
 func TestConnectorRetriesUntilSuccess(t *testing.T) {
-	unregisterAllDrivers()
+	UnregisterAll()
 	mysqlErr := errors.New(MysqlErrorText)
 	d := &testRetryingFailureDriver{
 		ConnErr:   []error{mysqlErr, mysqlErr, mysqlErr},
@@ -477,7 +477,7 @@ func TestConnectorRetriesUntilSuccess(t *testing.T) {
 }
 
 func TestConnectorRetriesUntilMax(t *testing.T) {
-	unregisterAllDrivers()
+	UnregisterAll()
 	var connErr []error
 	maxCalled := 5
 	for i := 0; i < maxCalled; i++ {
@@ -546,7 +546,7 @@ func TestConnectorRetriesUntilMax(t *testing.T) {
 }
 
 func TestConnectorRetriesUntilNonAuthError(t *testing.T) {
-	unregisterAllDrivers()
+	UnregisterAll()
 	var connErr []error
 	maxCalled := 5
 	for i := 0; i < maxCalled-1; i++ {
@@ -615,7 +615,7 @@ func TestConnectorRetriesUntilNonAuthError(t *testing.T) {
 }
 
 func TestConnectorErrorsIfUnknownDBErrorMessage(t *testing.T) {
-	unregisterAllDrivers()
+	UnregisterAll()
 	d := &testFailingDriver{
 		ConnErr: errors.New(""),
 	}

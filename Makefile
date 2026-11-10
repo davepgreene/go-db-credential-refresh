@@ -27,7 +27,7 @@ test: ## Test everything
 	@printf "\n$(GREEN)Testing Vault store$(RESET)\n"
 	@cd store/vault && $(MAKE) -s test
 	@printf "\n$(GREEN)Testing main module$(RESET)\n"
-	@go test github.com/davepgreene/go-db-credential-refresh/driver -count=1 -coverprofile=cover.out
+	@go test github.com/davepgreene/go-db-credential-refresh/driver/... -count=1 -coverprofile=cover.out
 
 lint: lint-setup ## Lint everything
 	@printf "$(GREEN)Linting AWS RDS store$(RESET)\n"

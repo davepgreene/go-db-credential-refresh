@@ -9,8 +9,6 @@ import (
 	"testing"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/jackc/pgx/v4/stdlib"
-	v5 "github.com/jackc/pgx/v5/stdlib"
 	"github.com/lib/pq"
 )
 
@@ -36,14 +34,12 @@ var (
 	driverMu         sync.RWMutex
 	driverFactories  = make(map[string]factory)
 	availableDrivers = map[string]factory{
-		"pgxv4": pgxDriver,
-		"pgx":   pgxV5Driver,
 		"mysql": mysqlDriver,
 		"pq":    pqDriver,
 	}
 	errInvalidDriverName = fmt.Errorf(
 		"invalid Driver name. Must be one of: %s",
-		strings.Join(drivers(), ", "),
+		strings.Join(Drivers(), ", "),
 	)
 )
 
@@ -79,6 +75,22 @@ func Register(name string, f factory) error {
 	return nil
 }
 
+// Unregister removes a driver from the registry by name
+func Unregister(name string) {
+	driverMu.Lock()
+	defer driverMu.Unlock()
+
+	delete(driverFactories, name)
+}
+
+// UnregisterAll removes all drivers from the registry
+func UnregisterAll() {
+	driverMu.Lock()
+	defer driverMu.Unlock()
+
+	driverFactories = make(map[string]factory)
+}
+
 func registerAllDrivers() {
 	for k, v := range availableDrivers {
 		if err := Register(k, v); err != nil {
@@ -89,7 +101,8 @@ func registerAllDrivers() {
 	}
 }
 
-func drivers() []string {
+// Drivers returns a list of registered driver names
+func Drivers() []string {
 	driverMu.Lock()
 	defer driverMu.Unlock()
 
@@ -127,22 +140,6 @@ func mysqlDriver() *Driver {
 		Driver:    &mysql.MySQLDriver{},
 		Formatter: MysqlFormatter,
 		AuthError: MySQLAuthError,
-	}
-}
-
-func pgxDriver() *Driver {
-	return &Driver{
-		Driver:    &stdlib.Driver{},
-		Formatter: PgFormatter,
-		AuthError: PostgreSQLAuthError,
-	}
-}
-
-func pgxV5Driver() *Driver {
-	return &Driver{
-		Driver:    &v5.Driver{},
-		Formatter: PgFormatter,
-		AuthError: PostgreSQLAuthError,
 	}
 }
 
