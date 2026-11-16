@@ -6,7 +6,7 @@ require (
 	github.com/go-sql-driver/mysql v1.10.1
 	github.com/go-test/deep v1.1.2
 	github.com/jackc/pgx/v4 v4.18.3
-	github.com/jackc/pgx/v5 v5.12.0
+	github.com/jackc/pgx/v5 v5.13.0
 	github.com/lib/pq v1.12.3
 )
 
